@@ -3,6 +3,14 @@ dimensions={
   h:parseInt($(window).innerHeight()),
 }
 
+Animator=function(){
+  this.paused=false,
+  this.toggle=function(){
+    this.paused= !this.paused;
+  }
+}
+anim=new Animator()
+
 function resizeDimensions(elem,width,height){
     //calc scale coefficients and store current position
     var scaleX = width/elem.bounds.width;
@@ -64,7 +72,7 @@ var gradientBg = new Path.Rectangle({
     // that runs between the two points we defined earlier:
 gradientBg.fillColor= {
   gradient: {
-    stops: ['red', 'red','red'],
+    stops: ['red', 'red','blue'],
     radial:true
   },
   origin:gradientBg.position,
@@ -90,6 +98,7 @@ crv.translate(new Point(0,dimensions.h/2));
   crv.smooth({ type: 'catmull-rom', factor: 0.5 });
 
 gradientBg.onFrame= function(event){
+  if(anim.paused) return;
   var currentSpec=fft.analyze();
   var newHue=[ getColorFromAmplitude(0),getColorFromAmplitude(60),getColorFromAmplitude(122)];
   var colour= this.fillColor;
@@ -99,6 +108,7 @@ gradientBg.onFrame= function(event){
 }
 
 crv.onFrame=function(event){
+  if(anim.paused) return;
   if(event.count==200){
     console.log(crv.segments)
   }

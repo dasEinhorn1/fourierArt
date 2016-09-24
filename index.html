@@ -36,6 +36,7 @@
           <option value="guillotine.mp3">Rap</option>
           <option value="Jahzzar_Siesta.mp3">Acoustic</option>
           <option value="WreckingBall.mp3">Pop</option>
+          <option value="skrillex.mp3">Dubstep</option>
           <option value="pirlose.mp3">Mystery</option>
         </select>
       </div>
@@ -48,16 +49,20 @@
     $("#play-pause").click(function(e){
           if ($(e.target).html()=="Pause"){
             mainS.pause();
+            anim.paused=true;
             $(e.target).html("Play");
           }else if ($(e.target).html()=="Play"){
             mainS.play();
+            anim.paused=false;
             $(e.target).html("Pause");
           }else{
             if(mainS.isPlaying()){
               mainS.pause();
+              anim.paused=true;
               $(e.target).html("Play");
             }else{
               mainS.play();
+              anim.paused=false;
               $(e.target).html("Pause");
             }
           }
