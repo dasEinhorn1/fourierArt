@@ -6,13 +6,10 @@
 		<script src="./js/fourier.js"></script>
 		
 		<script type="text/javascript">
-			var upload = function() {
-				console.log("Called upload function");
-				var sound-file = document.getElementById("sound-file");
-				var seffect = loadSound('sound-file');
-				var loadedFile = true;
-				return false;
-			};
+			function readAudioFile(e) {
+				e.preventDefault();
+				console.log("Success!");
+			}
 		</script>
 		
 		<header>
@@ -20,10 +17,10 @@
 		</header>
 		<main>
 			<!--Take file input-->
-			<form method="post" onsubmit="return upload();">
+			<form method="post" onsubmit="readAudioFile()">
 				<fieldset>
-					<input id="sound-file" type="file" />
-					<input type="submit" value="Upload">
+					<input type="file" id="soundInput"/>
+					<input type="submit" value="Submit">
 				</fieldset>
 			</form>
 		</main>

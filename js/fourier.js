@@ -1,6 +1,7 @@
 function preload()
 {
 	//initialize sound asset
+	console.log("Should have set loadedFile");
 	wilhelm = loadSound('media/sound/wilhelm.mp3');
 }
 
@@ -13,9 +14,10 @@ function draw()
 {
 	if(mouseIsPressed)
 	{
-		if(loadedFile)
+		console.log(soundEffect);
+		if (typeof(soundEffect) != 'undefined' && element != null)
 		{
-			seffect.play();
+		  soundEffect.play();
 		}
 		else
 		{
