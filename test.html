@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<script src="./js/p5.js"></script>
+		<script src="./js/p5.sound.min.js"></script>
+		<script src="./js/fourier.js"></script>
+		
+		<script type="text/javascript">
+			function readAudioFile(e) {
+				e.preventDefault();
+				console.log("Success!");
+			}
+		</script>
+		
+		<header>
+			<h1>Upload Sound File</h1>
+		</header>
+		<main>
+			<!--Take file input-->
+			<form method="post" onsubmit="readAudioFile()">
+				<fieldset>
+					<input type="file" id="soundInput"/>
+					<input type="submit" value="Submit">
+				</fieldset>
+			</form>
+		</main>
+	</body>
+</html>
