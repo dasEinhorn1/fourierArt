@@ -47,17 +47,90 @@ function getColorFromAmplitude(amplitude)
 	freq=0;
 	for (f = 0; f < fftBins; f++)
 	{
-		freqProximity = Math.abs(spectrum[f] - amplitude);
+		var freqProximity = Math.abs(spectrum[f] - amplitude);
 		//check if frequency is closer to amplitude than the previous best
 		if(freqProximity < proximity)
 		{
-			freq = f;
-			proximity = freqProximity;
+			var freq = f;
+			var proximity = freqProximity;
 		}
 	}
-	hueValue = (freq/fftBins)*360;
+	var hueValue = (freq/fftBins)*360;
 	return hueValue;
 }
+
+function getColorFromAmplitudeSmooth(amplitude)
+{
+	//initialize proximity
+	var proximity = 255;
+	//number of bars to buffer around
+	var buffer = 2;
+	
+	var spectrum = fft.analyze();
+	freq = 0;
+	for (f = buffer; f < fftBins - buffer; f++)
+	{
+		//average amplitude over buffer area
+		averageAmplitude = spectrum[f];
+		for(b = 1; b <= buffer; b++)
+		{
+			averageAmplitude += spectrum[f+b];
+			averageAmplitude += spectrum[f-b];
+		}
+		averageAmplitude = averageAmplitude / (2*buffer + 1);
+		var freqProximity = Math.abs(averageAmplitude - amplitude);
+		//check if frequency is closer to amplitude than the previous best
+		if(freqProximity < proximity)
+		{
+			var freq = f;
+			var proximity = freqProximity;
+		}
+	}
+	var hueValue = (freq/fftBins)*360;
+	return hueValue;
+}
+
+//returns a hue (0-360) based on the waveform value at chosen index
+function getColorFromWaveform(index)
+{
+	var waveform = fft.waveform();
+	//get a lower and upper bound for the waveform
+	var waveMin = Math.min.apply(null,waveform);
+	var waveMax = Math.max.apply(null,waveform);
+	
+	var waveAbsolute = waveform[index] - waveMin;
+	var waveColor = (waveAbsolute / (waveMax - waveMin))*360;
+	return waveColor;
+}
+
+//returns an array of 256 hue values (0-360) for waveform
+function getColorArrayFromWaveform()
+{
+	var waveColor = [];
+	var waveAbsolute = [];
+	
+	var waveform = fft.waveform();
+	//get lower and upper bound
+	var waveMin = Math.min.apply(null,waveform);
+	var waveMax = Math.max.apply(null,waveform);
+	
+	var waveAbsolute = waveform.map(function(waveVal){
+		var absolute = waveVal - waveMin;
+		return absolute;
+	});
+	
+	console.log(waveform);
+	console.log(waveAbsolute);
+	
+	var waveColor = waveAbsolute.map(function(absVal){
+		var col = (absVal / (waveMax - waveMin))*360;
+		return col;
+	});
+	
+	return waveColor;
+}
+
+
 
 function detectPeak()
 {
