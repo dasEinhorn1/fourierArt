@@ -1,8 +1,31 @@
 var freqProximity;
 var mainS;
-fft = new p5.FFT();
+
+fftBins = 256;
+
+fft = new p5.FFT(0.8,fftBins);
+peakDetect = new p5.PeakDetect(2000, 8000, 0.2);
+
 function preload(){
 	mainS = loadSound('media/sound/Jahzzar_Siesta.mp3');
+}
+
+function setup()
+{
+	background(0);
+	createCanvas(windowWidth,windowHeight);
+	noStroke();
+	fill(255);
+	textAlign(CENTER);
+	ellipseWidth = 50;
+}
+
+function mouseClicked()
+{
+	if(mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height)
+	{
+		togglePlay();
+	}
 }
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 function getColorFromAmplitude(amplitude)
@@ -12,7 +35,7 @@ function getColorFromAmplitude(amplitude)
 
 	var spectrum = fft.analyze();
 	freq=0;
-	for (f = 0; f < 1024; f++)
+	for (f = 0; f < fftBins; f++)
 	{
 		freqProximity = Math.abs(spectrum[f] - amplitude);
 		//check if frequency is closer to amplitude than the previous best
@@ -22,19 +45,52 @@ function getColorFromAmplitude(amplitude)
 			proximity = freqProximity;
 		}
 	}
-	hueValue = (freq/1023)*360;
+	hueValue = (freq/fftBins)*360;
 	return hueValue;
 }
 
+function detectPeak()
+{
+	fft.analyze();
+	peakDetect.update(fft);
+	if(peakDetect.isDetected)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+function draw()
+{
+	background(0);
+	if(mainS.isPlaying())
+	{
+		if(detectPeak()==1)
+		{
+			ellipseWidth = 300;
+			//fill(color(getColorFromAmplitude(122)));
+		}
+		else
+		{
+			ellipseWidth *= 0.95;
+		}
+	}
+
+	ellipse(500,500,ellipseWidth,ellipseWidth);
+}
+
 var getBarPos= function(freq,amplitude,maxW,maxH){// based on frequency and amplitude, I make a paper Point for the top left of each rect
-	x=maxW/1024 * freq;
+	x=maxW/fftBins * freq;
 	y=maxH/255 * amplitude;
 	return [x,y];
 }
 
 var getAllBarPos=function(spectrum,w,h){
 	var positions=[]
-	for(var i=0; i<1024; i++){
+	for(var i=0; i<fftBins; i++){
 		var amp=spectrum[i]
 		positions.push(getBarPos(i,amp,w,h));
 	}
@@ -50,5 +106,6 @@ function togglePlay()
 	else
 	{
 		mainS.play();
+		ellipseWidth=50;
 	}
 }
