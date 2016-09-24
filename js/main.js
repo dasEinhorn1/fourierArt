@@ -32,9 +32,10 @@ gradientBg.fillColor= {
 };
 function onFrame(event){
   if(event.count%5==0){
+    var newHue=getColorFromAmplitude();
     var colour= gradientBg.fillColor;
     for(clr in colour.gradient.stops){
-      colour.gradient.stops[clr].color.hue-=1;
+      colour.gradient.stops[clr].color.hue=newHue;
     }
   }
 }

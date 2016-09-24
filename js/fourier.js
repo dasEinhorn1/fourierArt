@@ -1,14 +1,6 @@
+fft = new p5.FFT();
 function preload(){
 	sound = loadSound('media/sound/wilhelm.mp3');
-}
-
-
-function setup()
-{
-	var cnv = createCanvas(100,100);
-	fft = new p5.FFT();
-	cnv.mouseClicked(togglePlay());
-	sound.amp(0.2);
 }
 
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
