@@ -1,7 +1,18 @@
-function setup() {
-	
+function preload()
+{
+	//initialize sound asset
+	wilhelm = loadSound('./media/sound/wilhelm.mp3');
 }
 
-function draw() {
-	ellipse(50,50,80,80);
+function setup()
+{
+
+}
+
+function draw()
+{
+	if(mouseIsPressed)
+	{
+		wilhelm.play();
+	}
 }
