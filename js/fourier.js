@@ -14,7 +14,6 @@ function draw()
 {
 	if(mouseIsPressed)
 	{
-		console.log(soundEffect);
 		if (typeof(soundEffect) != 'undefined' && element != null)
 		{
 		  soundEffect.play();
