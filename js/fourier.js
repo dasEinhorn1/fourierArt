@@ -2,7 +2,12 @@ var freqProximity;
 var mainS;
 fft = new p5.FFT();
 function preload(){
-	mainS = loadSound('media/sound/Jahzzar_Siesta.mp3');
+	mainS = loadSound('media/sound/guillotine.mp3');
+}
+
+function setup() {
+  mainS.setVolume(0.1);
+  mainS.play();
 }
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 function getColorFromAmplitude(amplitude)

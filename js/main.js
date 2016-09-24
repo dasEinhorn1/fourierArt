@@ -1,6 +1,6 @@
 dimensions={
-  w:$(window).innerWidth(),
-  h:$(window).innerHeight(),
+  w:parseInt($(window).innerWidth()),
+  h:parseInt($(window).innerHeight()),
 }
 
 function resizeDimensions(elem,width,height){
@@ -14,24 +14,28 @@ function resizeDimensions(elem,width,height){
     var newPos = prevPos + new Point(elem.bounds.width/2,elem.bounds.height/2);
     elem.position = newPos;
 }
-allBars=[];
+var allBars=new Group({});
 var drawBar = function(pt){
-  return new Path.Rectangle({
+  var bar= new Path.Rectangle({
     topLeft:pt,
-    bottomRight:[pt[0]+dimensions.w/1024,pt[1]+dimensions.h/255]
+    bottomRight:[pt[0]+(1.875),pt[1]+(1920/255)],
   });
+  bar.fillColor="green";
+  bar.strokeColor="green";
+  allBars.addChild(bar);
+  return bar;
 }
-var updateBar=function(pt){
-  resizeDimensions(allBars[pt[0]],pt[0],pt[1]);// resize bar existing at this points
+var updateBar=function(id,pt){
+  resizeDimensions(allBars.children[id],pt[0],pt[1]);// resize bar existing at this points
 }
 var updateBars=function(points){
   for(i in points){
-    updateBar(points[i]);
+    updateBar(i,points[i]);
   }
 }
 var drawBars=function(points){
   for (i in points){
-    allBars.push(drawBar(points[i]));
+    drawBar(points[i]);
   }
 }
 // Define two points which we will be using to construct
@@ -47,7 +51,7 @@ var gradientBg = new Path.Rectangle({
 });
     // Fill the path with a gradient of three color stops
     // that runs between the two points we defined earlier:
-gradientBg.fillColor= {
+/*gradientBg.fillColor= {
   gradient: {
     stops: ['red', 'black'],
     radial:true
@@ -55,29 +59,32 @@ gradientBg.fillColor= {
   origin:gradientBg.position,
   destination: gradientBg.bounds.rightCenter
 };
-
+*/
 //initialize bars to populate stuff
 drawBars(getAllBarPos(fft.analyze(),dimensions.w,dimensions.h));
-
-function onFrame(event){
-  var currentSpec=fft.analyze();
-  drawBars(getAllBarPos(currentSpec,dimensions.w,dimensions.h));
-  if(event.count%5==0){
-    var newHue=getColorFromAmplitude(255);
-    console.log(newHue);
-    var colour= gradientBg.fillColor;
-    for(clr in colour.gradient.stops){
-      colour.gradient.stops[clr].color.hue=newHue;
-    }
+allBars.bringToFront();
+allBars.position=new Point(dimensions.w/2,dimensions.h/2);
+allBars.onFrame=function(event){
+  if(event.count%10==0){
+    var currentSpec=fft.analyze();
+    updateBars(getAllBarPos(currentSpec));
   }
 }
+console.log(allBars.position)
+/*
+gradientBg.onFrame= function(event){
+  var currentSpec=fft.analyze();
+  var newHue=getColorFromAmplitude(122);
+  var colour= this.fillColor;
+  for(clr in colour.gradient.stops){
+    colour.gradient.stops[clr].color.hue=newHue;
+  }
+}
+*/
 $(window).resize(function(e){
-    console.log("resize");
-    var oldPos= gradientBg.bottomRight;
-    resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight())
+    //var oldPos= gradientBg.bottomRight;
+    dimensions.w=$(window).innerWidth();
+    
+    resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
+    allBars.position
 });
-
-$(function(){
-  preload();
-  togglePlay();
-})
