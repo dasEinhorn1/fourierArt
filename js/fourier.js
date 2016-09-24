@@ -11,11 +11,11 @@ function preload(){
 }
 
 function setup() {
-  mainS.setVolume(0.1);
+  mainS.setVolume(.1);
   mainS.play();
 }
 
-function setup()
+/*function setup()
 {
 	background(0);
 	createCanvas(windowWidth,windowHeight);
@@ -32,6 +32,7 @@ function mouseClicked()
 		togglePlay();
 	}
 }
+*/
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 function getColorFromAmplitude(amplitude)
 {
@@ -70,21 +71,6 @@ function detectPeak()
 
 function draw()
 {
-	background(0);
-	if(mainS.isPlaying())
-	{
-		if(detectPeak()==1)
-		{
-			ellipseWidth = 300;
-			//fill(color(getColorFromAmplitude(122)));
-		}
-		else
-		{
-			ellipseWidth *= 0.95;
-		}
-	}
-
-	ellipse(500,500,ellipseWidth,ellipseWidth);
 }
 
 var getBarPos= function(freq,amplitude,maxW,maxH){// based on frequency and amplitude, I make a paper Point for the top left of each rect
@@ -93,7 +79,7 @@ var getBarPos= function(freq,amplitude,maxW,maxH){// based on frequency and ampl
 	return [x,y];
 }
 
-var getAllBarPos=function(spectrum,w,h){
+var getAllBarPos=function(spectrum,w,h){//gets all positions
 	var positions=[]
 	for(var i=0; i<fftBins; i++){
 		var amp=spectrum[i]
@@ -111,6 +97,5 @@ function togglePlay()
 	else
 	{
 		mainS.play();
-		ellipseWidth=50;
 	}
 }

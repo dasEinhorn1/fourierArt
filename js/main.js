@@ -51,7 +51,7 @@ var gradientBg = new Path.Rectangle({
 });
     // Fill the path with a gradient of three color stops
     // that runs between the two points we defined earlier:
-/*gradientBg.fillColor= {
+gradientBg.fillColor= {
   gradient: {
     stops: ['red', 'black'],
     radial:true
@@ -59,8 +59,9 @@ var gradientBg = new Path.Rectangle({
   origin:gradientBg.position,
   destination: gradientBg.bounds.rightCenter
 };
-*/
+
 //initialize bars to populate stuff
+
 drawBars(getAllBarPos(fft.analyze(),dimensions.w,dimensions.h));
 allBars.bringToFront();
 allBars.position=new Point(dimensions.w/2,dimensions.h/2);
@@ -71,7 +72,7 @@ allBars.onFrame=function(event){
   }
 }
 console.log(allBars.position)
-/*
+
 gradientBg.onFrame= function(event){
   var currentSpec=fft.analyze();
   var newHue=getColorFromAmplitude(122);
@@ -80,11 +81,11 @@ gradientBg.onFrame= function(event){
     colour.gradient.stops[clr].color.hue=newHue;
   }
 }
-*/
+
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
     dimensions.w=$(window).innerWidth();
-    
+
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
     allBars.position
 });
