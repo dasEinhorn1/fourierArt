@@ -7,7 +7,12 @@ fft = new p5.FFT(0.8,fftBins);
 peakDetect = new p5.PeakDetect(2000, 8000, 0.2);
 
 function preload(){
-	mainS = loadSound('media/sound/Jahzzar_Siesta.mp3');
+	mainS = loadSound('media/sound/guillotine.mp3');
+}
+
+function setup() {
+  mainS.setVolume(0.1);
+  mainS.play();
 }
 
 function setup()
