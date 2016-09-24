@@ -2,6 +2,7 @@ dimensions={
   w:$(window).innerWidth(),
   h:$(window).innerHeight(),
 }
+
 function resizeDimensions(elem,width,height){
     //calc scale coefficients and store current position
     var scaleX = width/elem.bounds.width;
@@ -21,9 +22,13 @@ var drawBar = function(pt){
   });
 }
 var updateBar=function(pt){
-
+  resizeDimensions(allBars[pt[0]],pt[0],pt[1]);// resize bar existing at this points
 }
-
+var updateBars=function(points){
+  for(i in points){
+    updateBar(points[i]);
+  }
+}
 var drawBars=function(points){
   for (i in points){
     allBars.push(drawBar(points[i]));
@@ -51,6 +56,9 @@ gradientBg.fillColor= {
   destination: gradientBg.bounds.rightCenter
 };
 
+//initialize bars to populate stuff
+drawBars(getAllBarPos(fft.analyze(),dimensions.w,dimensions.h));
+
 function onFrame(event){
   var currentSpec=fft.analyze();
   drawBars(getAllBarPos(currentSpec,dimensions.w,dimensions.h));
@@ -68,3 +76,8 @@ $(window).resize(function(e){
     var oldPos= gradientBg.bottomRight;
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight())
 });
+
+$(function(){
+  preload();
+  togglePlay();
+})

@@ -1,8 +1,8 @@
 var freqProximity;
-
+var mainS;
 fft = new p5.FFT();
 function preload(){
-	sound = loadSound('media/sound/wilhelm.mp3');
+	mainS = loadSound('media/sound/Jahzzar_Siesta.mp3');
 }
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 function getColorFromAmplitude(amplitude)
@@ -41,20 +41,14 @@ var getAllBarPos=function(spectrum,w,h){
 	return positions;
 }
 
-function draw()
-{
-	background(0);
-	noStroke();
-}
-
 function togglePlay()
 {
-	if(sound.isPlaying())
+	if(mainS.isPlaying())
 	{
-		sound.pause();
+		mainS.pause();
 	}
 	else
 	{
-		sound.play();
+		mainS.play();
 	}
 }
