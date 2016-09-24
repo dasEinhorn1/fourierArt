@@ -1,27 +1,53 @@
-function preload()
-{
-	//initialize sound asset
-	console.log("Should have set loadedFile");
-	wilhelm = loadSound('media/sound/wilhelm.mp3');
+function preload(){
+	sound = loadSound('media/sound/wilhelm.mp3');
 }
+
 
 function setup()
 {
-
+	var cnv = createCanvas(100,100);
+	fft = new p5.FFT();
+	cnv.mouseClicked(analyzeAudio(sound));
+	sound.amp(0.2);
 }
 
-function draw()
+//returns a hue (0-360) based on the frequency closest to chosen amplitude
+function getColorFromAmplitude(amplitude)
 {
-	if(mouseIsPressed)
+	//initialize proximity to chosen amplitude
+	proximity = 255;
+	
+	spectrum = fft.analyze();
+	for (f = 0; f < 1023; f++)
 	{
-		console.log(soundEffect);
-		if (typeof(soundEffect) != 'undefined' && element != null)
+		freqProximity = Math.abs(spectrum[f] - amplitude);
+		//check if frequency is closer to amplitude than the previous best
+		if(freqProximity < proximity)
 		{
-		  soundEffect.play();
-		}
-		else
-		{
-			wilhelm.play();
+			freq = f;
+			proximity = freqProximity;
 		}
 	}
+	
+	freq++;
+	hue = (1024/freq)*360;
+	return hue;
+}
+
+function togglePlay()
+{
+	if(sound.isPlaying())
+	{
+		sound.pause();
+	}
+	else
+	{
+		sound.play();
+	}
+}
+
+function analyzeAudio(track) {
+	console.log("Apparently working!");
+	var spectrum = fft.analyze(track);
+	console.log(spectrum[0]);
 }
