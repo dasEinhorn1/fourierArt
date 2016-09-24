@@ -37,38 +37,17 @@ function mouseClicked()
 	}
 }
 */
+
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
-function getColorFromAmplitude(amplitude)
-{
-	//initialize proximity to chosen amplitude
-	var proximity = 255;
-
-	var spectrum = fft.analyze();
-	freq=0;
-	for (f = 0; f < fftBins; f++)
-	{
-		var freqProximity = Math.abs(spectrum[f] - amplitude);
-		//check if frequency is closer to amplitude than the previous best
-		if(freqProximity < proximity)
-		{
-			var freq = f;
-			var proximity = freqProximity;
-		}
-	}
-	var hueValue = (freq/fftBins)*360;
-	return hueValue;
-}
-
-function getColorFromAmplitudeSmooth(amplitude)
-{
+//accepts a buffer range (for smoothing) and a start and end point
+function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins-1)
+{		
 	//initialize proximity
 	var proximity = 255;
-	//number of bars to buffer around
-	var buffer = 2;
 	
 	var spectrum = fft.analyze();
 	freq = 0;
-	for (f = buffer; f < fftBins - buffer; f++)
+	for (f = start + buffer; f < end - buffer; f++)
 	{
 		//average amplitude over buffer area
 		averageAmplitude = spectrum[f];
@@ -86,8 +65,18 @@ function getColorFromAmplitudeSmooth(amplitude)
 			var proximity = freqProximity;
 		}
 	}
-	var hueValue = (freq/fftBins)*360;
+	var hueValue = (freq/(end-start))*360;
 	return hueValue;
+}
+
+function getWaveform(scale=1)
+{
+	var waveform = fft.waveform();
+	var scaledWaveform = waveform.map(function(height){
+		height *= scale;
+		return height;
+	});
+	return scaledWaveform;
 }
 
 //returns a hue (0-360) based on the waveform value at chosen index
