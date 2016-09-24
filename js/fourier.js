@@ -7,7 +7,7 @@ function setup()
 {
 	var cnv = createCanvas(100,100);
 	fft = new p5.FFT();
-	cnv.mouseClicked(analyzeAudio(sound));
+	cnv.mouseClicked(togglePlay());
 	sound.amp(0.2);
 }
 
@@ -28,10 +28,14 @@ function getColorFromAmplitude(amplitude)
 			proximity = freqProximity;
 		}
 	}
-	
-	freq++;
-	hue = (1024/freq)*360;
-	return hue;
+	hueValue = (freq/1023)*360;
+	return hueValue;
+}
+
+function draw()
+{
+	background(0);
+	noStroke();
 }
 
 function togglePlay()
