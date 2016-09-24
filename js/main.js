@@ -1,5 +1,16 @@
+function resizeDimensions(elem,width,height){
+    //calc scale coefficients and store current position
+    var scaleX = width/elem.bounds.width;
+    var scaleY = height/elem.bounds.height;
+    var prevPos = new Point(elem.bounds.x,elem.bounds.y);
 
+    //apply calc scaling
+    elem.scale(scaleX,scaleY);
 
+    //reposition the elem to previous pos(scaling moves the elem so we reset it's position);
+    var newPos = prevPos + new Point(elem.bounds.width/2,elem.bounds.height/2);
+    elem.position = newPos;
+}
 // Define two points which we will be using to construct
 // the path and to position the gradient color:
 var topLeft =[0,0];
@@ -19,4 +30,10 @@ var gradientBg = new Path.Rectangle({
         origin: topLeft,
         destination: bottomRight
     }
+});
+
+$(window).resize(function(e){
+    console.log("resize");
+    var oldPos= gradientBg.bottomRight;
+    resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight())
 });
