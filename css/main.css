@@ -1,0 +1,68 @@
+html,
+main,
+body {
+  font-family:'Baloo Bhaina', cursive;
+  margin: 0;
+  overflow: hidden;
+  height: 100%;
+  color:#CBF7ED;
+}
+main{
+  width: 100%;
+}
+header{
+  position:absolute;
+  z-index: 3;
+  width:100%;
+  background-color: rgba(22,25,37,.5);
+  overflow-y:hidden;
+}
+.title{
+  float:left;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding-left: .5em;
+
+}
+.navbar {
+    list-style-type: none;
+    margin: 0;
+    padding-top: 20px;
+    overflow: hidden;
+}
+.navbar li{
+  float: right;
+
+}
+
+.navbar a{
+  text-decoration: none;
+  color:#CBF7ED;
+  display: block;
+  padding: 8px;
+  padding-right:12px;
+}
+canvas{
+  position: absolute;
+  background-color: #23395B;
+  z-index: 0;
+}
+canvas[resize] {
+    width: 100%;
+    height: 100%;
+}
+
+#controls{
+  position: absolute;
+  padding-left:1em;
+  padding-top: 5px;
+  bottom: 1em;
+  left: 1em;
+  width: 20%;
+  height: 150px;
+  z-index: 1;
+  background-color: rgba(22,25,37,.5);
+}
+#controls h3{
+  margin-top: 0px;
+}

@@ -4,14 +4,31 @@
   <head>
     <meta charset="utf-8">
     <title>Fourier Art</title>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/fourier.js"></script>
+    <script src="js/paper-full.min.js"></script>
+    <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
+    <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
   </head>
   <body>
     <header>
-      <h1>Fourier Art</h1>
+      <h1 class="title">Fourier Art</h1>
+      <ol class="navbar">
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="index.html">Visualizer</a></li>
+
+
+      </ol>
     </header>
-    <main>
-      <div id="visualizer">
-        
+    <main style="float:clear">
+      <!--Two.js applies to div below-->
+      <canvas id="visualizer" resize="true"></canvas>
+
+      <!--All UI for controlling visualization-->
+      <div id="controls">
+        <h3>Visualizer controls</h3>
       </div>
     </main>
     <footer>
