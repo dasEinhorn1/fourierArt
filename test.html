@@ -1,6 +1,30 @@
 <!DOCTYPE html>
 <html>
-	<script src="./js/p5.js"></script>
-	<script src="./js/p5.sound.min.js"></script>
-	<script src="./js/fourier.js"></script>
+	<body>
+		<script src="./js/p5.js"></script>
+		<script src="./js/p5.sound.min.js"></script>
+		<script src="./js/fourier.js"></script>
+		
+		<script type="text/javascript">
+			var upload = function() {
+				var sound-file = document.getElementById("sound-file");
+				seffect = loadSound('sound-file');
+				var loadedFile = true;
+				return false;
+			};
+		</script>
+		
+		<header>
+			<h1>Upload Sound File</h1>
+		</header>
+		<main>
+			<!--Take file input-->
+			<form action="/" method="post" onsubmit="return upload();">
+				<fieldset>
+					<input id="sound-file" type="file" />
+					<input type="submit" value="Upload">
+				</fieldset>
+			</form>
+		</main>
+	</body>
 </html>
