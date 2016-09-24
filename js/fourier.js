@@ -59,16 +59,16 @@ function getColorFromAmplitude(amplitude)
 	return hueValue;
 }
 
-function getColorFromAmplitudeSmooth(amplitude)
+function getColorFromAmplitudeSmooth(amplitude, start, end)
 {
 	//initialize proximity
 	var proximity = 255;
-	//number of bars to buffer around
+	//number of bars to buffer with
 	var buffer = 2;
 	
 	var spectrum = fft.analyze();
 	freq = 0;
-	for (f = buffer; f < fftBins - buffer; f++)
+	for (f = start + buffer; f < end - buffer; f++)
 	{
 		//average amplitude over buffer area
 		averageAmplitude = spectrum[f];
@@ -86,7 +86,7 @@ function getColorFromAmplitudeSmooth(amplitude)
 			var proximity = freqProximity;
 		}
 	}
-	var hueValue = (freq/fftBins)*360;
+	var hueValue = (freq/(end-start))*360;
 	return hueValue;
 }
 
