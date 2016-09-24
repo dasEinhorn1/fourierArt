@@ -31,11 +31,43 @@
       <!--All UI for controlling visualization-->
       <div id="controls">
         <h3>Visualizer controls</h3>
+        <button id="play-pause">Pause</button>
+        <select id="songSelect">
+          <option value="guillotine.mp3">Rap</option>
+          <option value="Jahzzar_Siesta.mp3">Acoustic</option>
+          <option value="WreckingBall.mp3">Pop</option>
+          <option value="pirlose.mp3">Mystery</option>
+        </select>
       </div>
     </main>
     <footer>
 
     </footer>
   </body>
-  <script type="text/javascript"></script>
+  <script type="text/javascript">
+    $("#play-pause").click(function(e){
+          if ($(e.target).html()=="Pause"){
+            mainS.pause();
+            $(e.target).html("Play");
+          }else if ($(e.target).html()=="Play"){
+            mainS.play();
+            $(e.target).html("Pause");
+          }else{
+            if(mainS.isPlaying()){
+              mainS.pause();
+              $(e.target).html("Play");
+            }else{
+              mainS.play();
+              $(e.target).html("Pause");
+            }
+          }
+    });
+    $("#songSelect").change(function(e){
+      if(mainS.isPlaying()){
+        mainS.stop();
+      }
+      mainS=loadSound("media/sound/"+$(e.target).val())
+      setup();
+    });
+  </script>
 </html>

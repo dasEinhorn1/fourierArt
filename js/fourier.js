@@ -10,9 +10,13 @@ function preload(){
 	mainS = loadSound('media/sound/guillotine.mp3');
 }
 
-function setup() {
-  mainS.setVolume(.1);
-  mainS.play();
+function setup(){
+	try{
+		mainS.setVolume(.1);
+		mainS.play();
+	}catch(e){
+		setTimeout(setup,1000);
+	}
 }
 
 /*function setup()

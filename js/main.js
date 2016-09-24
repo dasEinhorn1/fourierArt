@@ -14,7 +14,8 @@ function resizeDimensions(elem,width,height){
     var newPos = prevPos + new Point(elem.bounds.width/2,elem.bounds.height/2);
     elem.position = newPos;
 }
-var allBars=new Group({});
+
+/*var allBars=new Group({});
 var drawBar = function(pt){
   var bar= new Path.Rectangle({
     topLeft:pt,
@@ -38,6 +39,16 @@ var drawBars=function(points){
     drawBar(points[i]);
   }
 }
+*/
+
+var crv=new Path();
+console.log(crv);
+crv.strokeColor = 'white';
+crv.strokeWidth = 10;
+for(var i=0; i<257; i++){
+  crv.add(new Point(i*(dimensions.w/256),0));
+}
+crv.segments[10].point.y=10;
 // Define two points which we will be using to construct
 // the path and to position the gradient color:
 var topLeft =[0,0];
@@ -53,7 +64,7 @@ var gradientBg = new Path.Rectangle({
     // that runs between the two points we defined earlier:
 gradientBg.fillColor= {
   gradient: {
-    stops: ['red', 'black'],
+    stops: ['red', 'red','red'],
     radial:true
   },
   origin:gradientBg.position,
@@ -61,7 +72,7 @@ gradientBg.fillColor= {
 };
 
 //initialize bars to populate stuff
-
+/*
 drawBars(getAllBarPos(fft.analyze(),dimensions.w,dimensions.h));
 allBars.bringToFront();
 allBars.position=new Point(dimensions.w/2,dimensions.h/2);
@@ -72,20 +83,36 @@ allBars.onFrame=function(event){
   }
 }
 console.log(allBars.position)
+*/
+
+crv.bringToFront();
+crv.translate(new Point(0,dimensions.h/2));
+  crv.smooth({ type: 'catmull-rom', factor: 0.5 });
 
 gradientBg.onFrame= function(event){
   var currentSpec=fft.analyze();
-  var newHue=getColorFromAmplitude(122);
+  var newHue=[ getColorFromAmplitude(0),getColorFromAmplitude(60),getColorFromAmplitude(122)];
   var colour= this.fillColor;
   for(clr in colour.gradient.stops){
-    colour.gradient.stops[clr].color.hue=newHue;
+    colour.gradient.stops[clr].color.hue=newHue[clr];
   }
 }
 
+crv.onFrame=function(event){
+  if(event.count==200){
+    console.log(crv.segments)
+  }
+  var currentSpec=fft.analyze();
+  for(var i in crv.segments){
+    crv.segments[i].point.y=currentSpec[i];
+  }
+  crv.translate(new Point(0,dimensions.h/2));
+}
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
     dimensions.w=$(window).innerWidth();
-
+    dimensions.h=$(window).innerWidth();
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
-    allBars.position
+    crv.translate(new Point(0,dimensions.h/2));
+
 });
