@@ -6,10 +6,18 @@ dimensions={
 
 Animator=function(){
   this.paused=false,
-
   this.toggle=function(){
     this.paused= !this.paused;
+  },
+  this.play=function(){
+    paused=false;
+  },
+  this.pause=function(){
+      paused=true;
   }
+  this.reset=function(){
+    resetFftCircles(anim);
+  },
   this.trimPath=function(pth){// constructs path, but trims of trailing zeros and scales as necessary.
     count=0;
     for(var i=pth.segments.length-1; i>-1; i-=1){//loop from last to first.
@@ -68,11 +76,20 @@ for(var i=0; i<16; i++){ // i(totalwidth/32)+totalwidth/16
   c1= new Path.Circle(new Point((i*dimensions.w/16),dimensions.h/2), dimensions.circle);
   c1.fillColor="white";
   c2=c1.clone();
+  c1.fillColor="black";
   var tempG=new Group();
   tempG.addChildren([c1,c2]);
   fftCircles.addChild(tempG);
-}
 
+}
+var resetFftCircles = function(anim){
+  for(var i=0; i<fftCircles.children.length;i++){
+    var cG=fftCircles.children[i];
+    for(var j=0;j<2;j++){
+      cG.children[j].position.y=dimensions.h/2;
+    }
+  }
+}
 var waveFormCrv=new Path();
 waveFormCrv.strokeColor='black';
 waveFormCrv.strokeWidth= 20;
@@ -138,29 +155,35 @@ gradientBg.onFrame= function(event){
     }
   }
 }
-
+var dirs=[1,-1];
 fftCircles.onFrame=function(event){
-  dirs=[1,-1];
+  if(event.count%2!=0) return;
   if(anim.paused) return;
   var currentAvgs=getSubdividedAvg(fft.analyze());//get averages
   for(var i in fftCircles.children){
     var currChild=fftCircles.children[i];
     for(var j=0;j<2;j++){
       var currCircle=currChild.children[j];
-      if(currCircle.position.y<fftCircles.bounds.center.y-200 && dirs[j]==-1){
-        dirs[j]=1;
+      if(currCircle.position.y <= fftCircles.bounds.center.y-300 && dirs[j]==-1){
+        currCircle.bringToFront();
+        dirs[0]*=-1;
+        dirs[1]*=-1;
       }
-      if(currCircle.position.y>fftCircles.bounds.center.y+200 && dirs[j]==1){
-        dirs[j]=-1;
+      if(currCircle.position.y>fftCircles.bounds.center.y+300 && dirs[j]==1){
+        dirs[0]*=-1;
+        dirs[1]*=-1;
       }
-      var dy=((currentAvgs[i]/100)*dirs[j]);
-      currCircle.translate(new Point(0,dy));// here I set all my y values. for half they are positive.
+      var dy=((currentAvgs[i]/50));
+      //currCircle.(currentAvgs[i]/currCircle.scaling, currCircle.bounds.center);;
+      currCircle.translate(new Point(0,dy*dirs[j]));// here I set all my y values. for half they are positive.
     }
     currChild.position.y=dimensions.h/2;
-    currChild.position.y=(dimensions.h/2);
   }
   fftCircles.bringToFront();
   fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
+  if(!mainS.isPlaying()){
+    anim.reset();
+  }
 }
 waveFormCrv.onFrame=function(event){
   if(anim.paused) return;

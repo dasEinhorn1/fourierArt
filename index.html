@@ -70,9 +70,11 @@
     $("#songSelect").change(function(e){
       if(mainS.isPlaying()){
         mainS.stop();
+        anim.pause();
       }
       mainS=loadSound("media/sound/"+$(e.target).val())
       setup();
+      anim.play();
     });
   </script>
 </html>
