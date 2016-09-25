@@ -135,6 +135,24 @@ function detectPeak()
 	}
 }
 
+//trim 'zero tail' off of the end of the fourier transform array
+function trimZeroes(fourierArray)
+{
+	var tolerance=4;
+	var breakPoint = fourierArray.length; //do not shorten array by default
+	for(f=fourierArray.length-1; f > 0; f--)
+	{
+		//when non-zero is detected, break from loop and trim array
+		if(fourierArray[f]!=0)
+		{
+			breakPoint = f + 1;
+			break;
+		}
+	}
+	trimmedArray = fourierArray.slice(0,breakPoint);
+	return trimmedArray;
+}
+
 function draw()
 {
 }
