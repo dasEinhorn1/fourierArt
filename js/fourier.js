@@ -4,7 +4,7 @@ var mainS;
 fftBins = 256;
 
 fft = new p5.FFT(0.8,fftBins);
-peakDetect = new p5.PeakDetect(2000, 8000, 0.2);
+peakDetect = new p5.PeakDetect(0, 7000, 0.23);
 
 function preload(){
 	mainS = loadSound('media/sound/guillotine.mp3');
@@ -41,10 +41,10 @@ function mouseClicked()
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 //accepts a buffer range (for smoothing) and a start and end point
 function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins-1)
-{		
+{
 	//initialize proximity
 	var proximity = 255;
-	
+
 	var spectrum = fft.analyze();
 	freq = 0;
 	for (f = start + buffer; f < end - buffer; f++)
@@ -86,7 +86,7 @@ function getColorFromWaveform(index)
 	//get a lower and upper bound for the waveform
 	var waveMin = Math.min.apply(null,waveform);
 	var waveMax = Math.max.apply(null,waveform);
-	
+
 	var waveAbsolute = waveform[index] - waveMin;
 	var waveColor = (waveAbsolute / (waveMax - waveMin))*360;
 	return waveColor;
@@ -97,25 +97,25 @@ function getColorArrayFromWaveform()
 {
 	var waveColor = [];
 	var waveAbsolute = [];
-	
+
 	var waveform = fft.waveform();
 	//get lower and upper bound
 	var waveMin = Math.min.apply(null,waveform);
 	var waveMax = Math.max.apply(null,waveform);
-	
+
 	var waveAbsolute = waveform.map(function(waveVal){
 		var absolute = waveVal - waveMin;
 		return absolute;
 	});
-	
+
 	console.log(waveform);
 	console.log(waveAbsolute);
-	
+
 	var waveColor = waveAbsolute.map(function(absVal){
 		var col = (absVal / (waveMax - waveMin))*360;
 		return col;
 	});
-	
+
 	return waveColor;
 }
 

@@ -4,10 +4,37 @@ dimensions={
 }
 
 Animator=function(){
+  this.trimmer={
+    time: 10, // loops which may pass before zeros are trimmed
+    startTime: 0,
+    currentTPath: null
+  }
   this.paused=false,
   this.toggle=function(){
     this.paused= !this.paused;
   }
+  this.trimPath=function(pth,time){// constructs path, but trims of trailing zeros and scales as necessary.
+    count=0;
+    if(this.trimmer.startTime==0){
+      this.trimmer.startTime=time;
+    }
+    for(var i=pth.segments-1; i>0; i--){//loop from last to first.
+      if(pth.segments[segments.length-i].point.y==0){
+        count+=1;
+      }else{
+        break;
+      }
+    }
+    if(trimdex<pth.segments.length){
+      //then i need to remove segments from trimmedPath
+      trimmedPath=pth.clone();
+      trimdex=pth.segments.length-count;
+      trimmedPath.removeSegments[trimdex];
+    }else{
+      return pth;
+    }
+  }
+
 }
 anim=new Animator()
 
@@ -49,14 +76,21 @@ var drawBars=function(points){
 }
 */
 
-var crv=new Path();
-console.log(crv);
-crv.strokeColor = 'white';
-crv.strokeWidth = 10;
+var fftCrv=new Path();
+console.log(fftCrv);
+fftCrv.strokeColor = 'white';
+fftCrv.strokeWidth = 10;
 for(var i=0; i<257; i++){
-  crv.add(new Point(i*(dimensions.w/256),0));
+  fftCrv.add(new Point(i*(dimensions.w/256),0));
 }
-crv.segments[10].point.y=10;
+
+var waveFormCrv=new Path();
+waveFormCrv.strokeColor='black';
+waveFormCrv.strokeWidth= 20;
+for(var i=0; i<257; i++){
+  waveFormCrv.add(new Point(i*(dimensions.w/256),0));
+}
+
 // Define two points which we will be using to construct
 // the path and to position the gradient color:
 var topLeft =[0,0];
@@ -92,39 +126,60 @@ allBars.onFrame=function(event){
 }
 console.log(allBars.position)
 */
-
-crv.bringToFront();
-crv.translate(new Point(0,dimensions.h/2));
-crv.smooth({ type: 'catmull-rom', factor: 0.5 });
-
+waveFormCrv.bringToFront();
+waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
+fftCrv.bringToFront();
+fftCrv.translate(new Point(0,dimensions.h/2));
+fftCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
+var bright=0;
 gradientBg.onFrame= function(event){
   if(anim.paused) return;
-  if(event.count%5==0){
+  if(event.count%1==0){
     var currentSpec=fft.analyze();
+    if (bright>0){
+      bright-=.01;
+    }
+    if(detectPeak()){
+      bright=1;
+    }
     var newHue=[ getColorFromAmplitude(256,0,0,25),getColorFromAmplitude(122,0,0,15),getColorFromAmplitude(0,0,0,15)];
     var colour= this.fillColor;
     for(clr in colour.gradient.stops){
       colour.gradient.stops[clr].color.hue=newHue[clr];
+      colour.gradient.stops[clr].color.brightness=bright;
     }
   }
 }
 
-crv.onFrame=function(event){
+fftCrv.onFrame=function(event){
   if(anim.paused) return;
   if(event.count==200){
-    console.log(crv.segments)
+    console.log(fftCrv.segments)
   }
   var currentSpec=fft.analyze();
-  for(var i in crv.segments){
-    crv.segments[i].point.y=currentSpec[i];
+  for(var i in fftCrv.segments){
+    fftCrv.segments[i].point.y=currentSpec[i];
   }
-  crv.translate(new Point(0,dimensions.h/2));
+  //trimmedFftCrv=anim.trimPath(fftCrv,event.time);
+  fftCrv.translate(new Point(0,dimensions.h/3));
 }
+
+waveFormCrv.onFrame=function(event){
+  if(anim.paused) return;
+  if(event.count%4==0){
+    var currentWave=getWaveform(100);
+    for(var i in waveFormCrv.segments){
+      waveFormCrv.segments[i].point.y=currentWave[i];
+    }
+    waveFormCrv.translate(new Point(0,dimensions.h/2));
+  }
+}
+
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
     dimensions.w=$(window).innerWidth();
     dimensions.h=$(window).innerWidth();
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
-    crv.translate(new Point(0,dimensions.h/2));
+    fftCrv.translate(new Point(0,dimensions.h/2));
 
 });
