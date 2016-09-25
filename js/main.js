@@ -64,8 +64,8 @@ var drawBars=function(points){
 */
 
 var fftCircles=new Group();
-for(var i=0; i<17; i++){ // i(totalwidth/32)+totalwidth/16
-  c1= new Path.Circle(new Point(i*dimensions.w/32 + dimensions.w/16,dimensions.h/2), dimensions.circle);
+for(var i=0; i<16; i++){ // i(totalwidth/32)+totalwidth/16
+  c1= new Path.Circle(new Point((i*dimensions.w/16),dimensions.h/2), dimensions.circle);
   c1.fillColor="white"
   c2=c1.clone();
   fftCircles.addChildren([c1,c2]);
@@ -117,7 +117,6 @@ fftCircles.bringToFront();
 waveFormCrv.bringToFront();
 waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
 
-waveFormCrv.selected="true";
 var bright=0;
 gradientBg.onFrame= function(event){
   if(anim.paused) return;
@@ -144,8 +143,9 @@ fftCircles.onFrame=function(event){
   for(var i in fftCircles.children){
     neg= -1;
     if(i%2==0) neg*=-1;
-    fftCircles.children[i].position=currentAvgs[i]*neg;// here I set all my y values. for half they are positive.
+    fftCircles.children[i].position.y=currentAvgs[i]*neg;// here I set all my y values. for half they are positive.
   }
+  fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
 }
 waveFormCrv.onFrame=function(event){
   if(anim.paused) return;
