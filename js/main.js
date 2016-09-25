@@ -1,12 +1,26 @@
 dimensions={
   w:parseInt($(window).innerWidth()),
   h:parseInt($(window).innerHeight()),
+  circle: 10
 }
 
 Animator=function(){
   this.paused=false,
+
   this.toggle=function(){
     this.paused= !this.paused;
+  }
+  this.trimPath=function(pth){// constructs path, but trims of trailing zeros and scales as necessary.
+    count=0;
+    for(var i=pth.segments.length-1; i>-1; i-=1){//loop from last to first.
+      if(pth.segments[i].point.y == dimensions.h/3 || pth.segments[i].point.y==NaN){
+        console.log("Slowly but surely")
+        count+=1;
+      }else{
+        break;
+      }
+    }
+    return 256-count;
   }
 }
 anim=new Animator()
@@ -49,14 +63,21 @@ var drawBars=function(points){
 }
 */
 
-var crv=new Path();
-console.log(crv);
-crv.strokeColor = 'white';
-crv.strokeWidth = 10;
-for(var i=0; i<257; i++){
-  crv.add(new Point(i*(dimensions.w/256),0));
+var fftCircles=new Group();
+for(var i=0; i<17; i++){ // i(totalwidth/32)+totalwidth/16
+  c1= new Path.Circle(new Point(i*dimensions.w/32 + dimensions.w/16,dimensions.h/2), dimensions.circle);
+  c1.fillColor="white"
+  c2=c1.clone();
+  fftCircles.addChildren([c1,c2]);
 }
-crv.segments[10].point.y=10;
+
+var waveFormCrv=new Path();
+waveFormCrv.strokeColor='black';
+waveFormCrv.strokeWidth= 20;
+for(var i=0; i<256; i++){
+  waveFormCrv.add(new Point(i*(dimensions.w/255),0));
+}
+
 // Define two points which we will be using to construct
 // the path and to position the gradient color:
 var topLeft =[0,0];
@@ -92,39 +113,56 @@ allBars.onFrame=function(event){
 }
 console.log(allBars.position)
 */
+fftCircles.bringToFront();
+waveFormCrv.bringToFront();
+waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
 
-crv.bringToFront();
-crv.translate(new Point(0,dimensions.h/2));
-crv.smooth({ type: 'catmull-rom', factor: 0.5 });
-
+waveFormCrv.selected="true";
+var bright=0;
 gradientBg.onFrame= function(event){
   if(anim.paused) return;
-  if(event.count%5==0){
+  if(event.count%1==0){
     var currentSpec=fft.analyze();
+    if (bright>0){
+      bright-=.01;
+    }
+    if(detectPeak()){
+      bright=1;
+    }
     var newHue=[ getColorFromAmplitude(256,0,0,25),getColorFromAmplitude(122,0,0,15),getColorFromAmplitude(0,0,0,15)];
     var colour= this.fillColor;
     for(clr in colour.gradient.stops){
       colour.gradient.stops[clr].color.hue=newHue[clr];
+      colour.gradient.stops[clr].color.brightness=bright;
     }
   }
 }
 
-crv.onFrame=function(event){
+fftCircles.onFrame=function(event){
   if(anim.paused) return;
-  if(event.count==200){
-    console.log(crv.segments)
+  var currentAvgs=fft.analyze();//get averages
+  for(var i in fftCircles.children){
+    neg= -1;
+    if(i%2==0) neg*=-1;
+    fftCircles.children[i].position=currentAvgs[i]*neg;// here I set all my y values. for half they are positive.
   }
-  var currentSpec=fft.analyze();
-  for(var i in crv.segments){
-    crv.segments[i].point.y=currentSpec[i];
-  }
-  crv.translate(new Point(0,dimensions.h/2));
 }
+waveFormCrv.onFrame=function(event){
+  if(anim.paused) return;
+  if(event.count%4==0){
+    var currentWave=getWaveform(200);
+    for(var i in waveFormCrv.segments){
+      waveFormCrv.segments[i].point.y=currentWave[i];
+    }
+    waveFormCrv.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2);
+  }
+}
+
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
-    dimensions.w=$(window).innerWidth();
-    dimensions.h=$(window).innerWidth();
+    dimensions.w= $(window).innerWidth();
+    dimensions.h= $(window).innerWidth();
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
-    crv.translate(new Point(0,dimensions.h/2));
-
+    waveFormCrv.position=new Point(0,dimensions.h/2);
+    fftCrv.position=new Point(fftCrv.bounds.width/2,dimensions.h/2);
 });

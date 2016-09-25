@@ -10,7 +10,7 @@ lastIncrEvent = 0;
 increaseEventBuffer = 20; //minimum of number of frames that must pass between each 'increase' event
 
 fft = new p5.FFT(0.8,fftBins);
-peakDetect = new p5.PeakDetect(0, 1000, 0.2);
+peakDetect = new p5.PeakDetect(0, 7000, 0.23);
 
 function preload(){
 	mainS = loadSound('media/sound/guillotine.mp3');
@@ -50,7 +50,7 @@ function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins - 1)
 {		
 	//initialize proximity
 	var proximity = 255;
-	
+
 	var spectrum = fft.analyze();
 	calculateAverage(spectrum); // re-calculate average and increment frame
 	
@@ -94,7 +94,7 @@ function getColorFromWaveform(index)
 	//get a lower and upper bound for the waveform
 	var waveMin = Math.min.apply(null,waveform);
 	var waveMax = Math.max.apply(null,waveform);
-	
+
 	var waveAbsolute = waveform[index] - waveMin;
 	var waveColor = (waveAbsolute / (waveMax - waveMin))*360;
 	return waveColor;
@@ -105,25 +105,25 @@ function getColorArrayFromWaveform()
 {
 	var waveColor = [];
 	var waveAbsolute = [];
-	
+
 	var waveform = fft.waveform();
 	//get lower and upper bound
 	var waveMin = Math.min.apply(null,waveform);
 	var waveMax = Math.max.apply(null,waveform);
-	
+
 	var waveAbsolute = waveform.map(function(waveVal){
 		var absolute = waveVal - waveMin;
 		return absolute;
 	});
-	
+
 	console.log(waveform);
 	console.log(waveAbsolute);
-	
+
 	var waveColor = waveAbsolute.map(function(absVal){
 		var col = (absVal / (waveMax - waveMin))*360;
 		return col;
 	});
-	
+
 	return waveColor;
 }
 
