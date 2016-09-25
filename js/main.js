@@ -66,9 +66,11 @@ var drawBars=function(points){
 var fftCircles=new Group();
 for(var i=0; i<16; i++){ // i(totalwidth/32)+totalwidth/16
   c1= new Path.Circle(new Point((i*dimensions.w/16),dimensions.h/2), dimensions.circle);
-  c1.fillColor="white"
+  c1.fillColor="white";
   c2=c1.clone();
-  fftCircles.addChildren([c1,c2]);
+  var tempG=new Group();
+  tempG.addChildren([c1,c2]);
+  fftCircles.addChild(tempG);
 }
 
 var waveFormCrv=new Path();
@@ -138,13 +140,26 @@ gradientBg.onFrame= function(event){
 }
 
 fftCircles.onFrame=function(event){
+  dirs=[1,-1];
   if(anim.paused) return;
-  var currentAvgs=fft.analyze();//get averages
+  var currentAvgs=getSubdividedAvg(fft.analyze());//get averages
   for(var i in fftCircles.children){
-    neg= -1;
-    if(i%2==0) neg*=-1;
-    fftCircles.children[i].position.y=currentAvgs[i]*neg;// here I set all my y values. for half they are positive.
+    var currChild=fftCircles.children[i];
+    for(var j=0;j<2;j++){
+      var currCircle=currChild.children[j];
+      if(currCircle.position.y<fftCircles.bounds.center.y-200 && dirs[j]==-1){
+        dirs[j]=1;
+      }
+      if(currCircle.position.y>fftCircles.bounds.center.y+200 && dirs[j]==1){
+        dirs[j]=-1;
+      }
+      var dy=((currentAvgs[i]/100)*dirs[j]);
+      currCircle.translate(new Point(0,dy));// here I set all my y values. for half they are positive.
+    }
+    currChild.position.y=dimensions.h/2;
+    currChild.position.y=(dimensions.h/2);
   }
+  fftCircles.bringToFront();
   fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
 }
 waveFormCrv.onFrame=function(event){
@@ -163,6 +178,6 @@ $(window).resize(function(e){
     dimensions.w= $(window).innerWidth();
     dimensions.h= $(window).innerWidth();
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
-    waveFormCrv.position=new Point(0,dimensions.h/2);
-    fftCrv.position=new Point(fftCrv.bounds.width/2,dimensions.h/2);
+    waveFormCrv.position=new Point(waveFormCrv.width/2,dimensions.h/2);
+    fftCircles.position=new Point(fftCircles.bounds.width/2,dimensions.h/2);
 });
