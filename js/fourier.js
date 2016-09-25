@@ -4,7 +4,7 @@ var mainS;
 fftBins = 256;
 
 fft = new p5.FFT(0.8,fftBins);
-peakDetect = new p5.PeakDetect(2000, 8000, 0.2);
+peakDetect = new p5.PeakDetect(0, 1000, 0.2);
 
 function preload(){
 	mainS = loadSound('media/sound/guillotine.mp3');
@@ -133,6 +133,24 @@ function detectPeak()
 	{
 		return 0;
 	}
+}
+
+//trim 'zero tail' off of the end of the fourier transform array
+function trimZeroes(fourierArray)
+{
+	var tolerance=4;
+	var breakPoint = fourierArray.length; //do not shorten array by default
+	for(f=fourierArray.length-1; f > 0; f--)
+	{
+		//when non-zero is detected, break from loop and trim array
+		if(fourierArray[f]!=0)
+		{
+			breakPoint = f + 1;
+			break;
+		}
+	}
+	trimmedArray = fourierArray.slice(0,breakPoint);
+	return trimmedArray;
 }
 
 function draw()
