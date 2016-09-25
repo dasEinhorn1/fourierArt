@@ -1,40 +1,27 @@
 dimensions={
   w:parseInt($(window).innerWidth()),
   h:parseInt($(window).innerHeight()),
+  circle: 10
 }
 
 Animator=function(){
-  this.trimmer={
-    time: 10, // loops which may pass before zeros are trimmed
-    startTime: 0,
-    currentTPath: null
-  }
   this.paused=false,
+
   this.toggle=function(){
     this.paused= !this.paused;
   }
-  this.trimPath=function(pth,time){// constructs path, but trims of trailing zeros and scales as necessary.
+  this.trimPath=function(pth){// constructs path, but trims of trailing zeros and scales as necessary.
     count=0;
-    if(this.trimmer.startTime==0){
-      this.trimmer.startTime=time;
-    }
-    for(var i=pth.segments-1; i>0; i--){//loop from last to first.
-      if(pth.segments[segments.length-i].point.y==0){
+    for(var i=pth.segments.length-1; i>-1; i-=1){//loop from last to first.
+      if(pth.segments[i].point.y == dimensions.h/3 || pth.segments[i].point.y==NaN){
+        console.log("Slowly but surely")
         count+=1;
       }else{
         break;
       }
     }
-    if(trimdex<pth.segments.length){
-      //then i need to remove segments from trimmedPath
-      trimmedPath=pth.clone();
-      trimdex=pth.segments.length-count;
-      trimmedPath.removeSegments[trimdex];
-    }else{
-      return pth;
-    }
+    return 256-count;
   }
-
 }
 anim=new Animator()
 
@@ -76,19 +63,19 @@ var drawBars=function(points){
 }
 */
 
-var fftCrv=new Path();
-console.log(fftCrv);
-fftCrv.strokeColor = 'white';
-fftCrv.strokeWidth = 10;
-for(var i=0; i<257; i++){
-  fftCrv.add(new Point(i*(dimensions.w/256),0));
+var fftCircles=new Group();
+for(var i=0; i<17; i++){ // i(totalwidth/32)+totalwidth/16
+  c1= new Path.Circle(new Point(i*dimensions.w/32 + dimensions.w/16,dimensions.h/2), dimensions.circle);
+  c1.fillColor="white"
+  c2=c1.clone();
+  fftCircles.addChildren([c1,c2]);
 }
 
 var waveFormCrv=new Path();
 waveFormCrv.strokeColor='black';
 waveFormCrv.strokeWidth= 20;
-for(var i=0; i<257; i++){
-  waveFormCrv.add(new Point(i*(dimensions.w/256),0));
+for(var i=0; i<256; i++){
+  waveFormCrv.add(new Point(i*(dimensions.w/255),0));
 }
 
 // Define two points which we will be using to construct
@@ -126,11 +113,11 @@ allBars.onFrame=function(event){
 }
 console.log(allBars.position)
 */
+fftCircles.bringToFront();
 waveFormCrv.bringToFront();
 waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
-fftCrv.bringToFront();
-fftCrv.translate(new Point(0,dimensions.h/2));
-fftCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
+
+waveFormCrv.selected="true";
 var bright=0;
 gradientBg.onFrame= function(event){
   if(anim.paused) return;
@@ -151,35 +138,31 @@ gradientBg.onFrame= function(event){
   }
 }
 
-fftCrv.onFrame=function(event){
+fftCircles.onFrame=function(event){
   if(anim.paused) return;
-  if(event.count==200){
-    console.log(fftCrv.segments)
+  var currentAvgs=fft.analyze();//get averages
+  for(var i in fftCircles.children){
+    neg= -1;
+    if(i%2==0) neg*=-1;
+    fftCircles.children[i].position=currentAvgs[i]*neg;// here I set all my y values. for half they are positive.
   }
-  var currentSpec=fft.analyze();
-  for(var i in fftCrv.segments){
-    fftCrv.segments[i].point.y=currentSpec[i];
-  }
-  //trimmedFftCrv=anim.trimPath(fftCrv,event.time);
-  fftCrv.translate(new Point(0,dimensions.h/3));
 }
-
 waveFormCrv.onFrame=function(event){
   if(anim.paused) return;
   if(event.count%4==0){
-    var currentWave=getWaveform(100);
+    var currentWave=getWaveform(200);
     for(var i in waveFormCrv.segments){
       waveFormCrv.segments[i].point.y=currentWave[i];
     }
-    waveFormCrv.translate(new Point(0,dimensions.h/2));
+    waveFormCrv.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2);
   }
 }
 
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
-    dimensions.w=$(window).innerWidth();
-    dimensions.h=$(window).innerWidth();
+    dimensions.w= $(window).innerWidth();
+    dimensions.h= $(window).innerWidth();
     resizeDimensions(gradientBg,$(window).innerWidth(),$(window).innerHeight());
-    fftCrv.translate(new Point(0,dimensions.h/2));
-
+    waveFormCrv.position=new Point(0,dimensions.h/2);
+    fftCrv.position=new Point(fftCrv.bounds.width/2,dimensions.h/2);
 });
