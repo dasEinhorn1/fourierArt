@@ -13,7 +13,7 @@ fft = new p5.FFT(0.8,fftBins);
 peakDetect = new p5.PeakDetect(0, 7000, 0.23);
 
 function preload(){
-	mainS = loadSound('media/sound/guillotine.mp3');
+	mainS = loadSound('media/sound/miloGoingNoPlace.mp3');
 }
 function setup(){
 	try{

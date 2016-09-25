@@ -48,21 +48,21 @@
   <script type="text/javascript">
     $("#play-pause").click(function(e){
           if ($(e.target).html()=="Pause"){
-            mainS.pause();
             anim.paused=true;
+            mainS.pause();
             $(e.target).html("Play");
           }else if ($(e.target).html()=="Play"){
-            mainS.play();
             anim.paused=false;
+            mainS.play();
             $(e.target).html("Pause");
           }else{
             if(mainS.isPlaying()){
-              mainS.pause();
               anim.paused=true;
+              mainS.pause();
               $(e.target).html("Play");
             }else{
-              mainS.play();
               anim.paused=false;
+              mainS.play();
               $(e.target).html("Pause");
             }
           }

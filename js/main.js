@@ -142,7 +142,7 @@ gradientBg.onFrame= function(event){
   if(event.count%1==0){
     var currentSpec=fft.analyze();
     if (bright>0){
-      bright-=.01;
+      bright-=.02;
     }
     if(detectPeak()){
       bright=1;
@@ -157,7 +157,7 @@ gradientBg.onFrame= function(event){
 }
 var dirs=[1,-1];
 fftCircles.onFrame=function(event){
-  if(event.count%2!=0) return;
+  if(event.count%3!=0) return;
   if(anim.paused) return;
   var currentAvgs=getSubdividedAvg(fft.analyze());//get averages
   for(var i in fftCircles.children){
@@ -192,10 +192,21 @@ waveFormCrv.onFrame=function(event){
     for(var i in waveFormCrv.segments){
       waveFormCrv.segments[i].point.y=currentWave[i];
     }
-    waveFormCrv.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2);
+    waveFormCrv.position=new Point(waveFormCrv.bounds.width/2,dimensions.h*2/3);
   }
 }
-
+var wv2=waveFormCrv.clone();
+wv2.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/3);
+wv2.onFrame=function(event){
+  if(anim.paused) return;
+  if(event.count%4==0){
+    var currentWave=getWaveform(200);
+    for(var i in wv2.segments){
+      wv2.segments[i].point.y=currentWave[i];
+    }
+    wv2.position=new Point(wv2.bounds.width/2,dimensions.h/3);
+  }
+};
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
     dimensions.w= $(window).innerWidth();
