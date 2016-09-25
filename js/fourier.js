@@ -3,6 +3,12 @@ var mainS;
 
 fftBins = 256;
 
+frameCount = 0;
+amplitudeAvg = 0;
+lastIncrEvent = 0;
+
+increaseEventBuffer = 20; //minimum of number of frames that must pass between each 'increase' event
+
 fft = new p5.FFT(0.8,fftBins);
 peakDetect = new p5.PeakDetect(0, 1000, 0.2);
 
@@ -40,12 +46,14 @@ function mouseClicked()
 
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 //accepts a buffer range (for smoothing) and a start and end point
-function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins-1)
+function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins - 1)
 {		
 	//initialize proximity
 	var proximity = 255;
 	
 	var spectrum = fft.analyze();
+	calculateAverage(spectrum); // re-calculate average and increment frame
+	
 	freq = 0;
 	for (f = start + buffer; f < end - buffer; f++)
 	{
@@ -119,7 +127,54 @@ function getColorArrayFromWaveform()
 	return waveColor;
 }
 
+function calculateAverage(fourierArray)
+{
+	var amplitudeTotal;
+	frameCount++;
+	
+	//calculate avg amplitude for this frame
+	for(f = 0; f < fftBins; f++)
+	{
+		amplitudeTotal += fourierArray[f];
+	}
+	var frameAvg = amplitudeTotal / fftBins; 
+	
+	var accAmplitude = amplitudeAvg * (frameCount - 1) //turn amplitudeAvg back into an accumulated sum of averages
+	amplitudeAvg = (accAmplitude + frameAvg) / frameCount; 
+	return amplitudeAvg;
+}
 
+//gets average amplitudes from 16 equal subdivisions of FFT curve for Adam's visual effect
+function getSubdividedAvg(fourierArray)
+{
+	var subNum = 16;
+	var binSize = fftBins/subNum;
+	var dividedAvgs = [];
+	var total = 0;
+	
+	for(b = 0; b < subNum; b++) //iterate through each bin
+	{
+		for(f = b*16; f < 16*(b+1); f++) //iterate through each frequency level
+		{
+			total += fourierArray[f];
+		}
+		dividedAvgs[b] = total / subNum; //store average amplitude for this bin in dividedArgs
+		total = 0;
+	}
+	return dividedAvgs;
+}
+
+function detectIncrease(frameAvg)
+{
+	if(frameCount - lastIncrEvent >= increaseEventBuffer)
+	{
+		if(frameAvg/amplitudeAvg >= 1.25)
+		{
+			lastIncrEvent = frameCount; //set current frame # to lastIncrEvent
+			triggerIncrEvent(); //This will be Adam's graphical work
+		}
+	}
+}
 
 function detectPeak()
 {
