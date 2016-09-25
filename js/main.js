@@ -95,15 +95,17 @@ console.log(allBars.position)
 
 crv.bringToFront();
 crv.translate(new Point(0,dimensions.h/2));
-  crv.smooth({ type: 'catmull-rom', factor: 0.5 });
+crv.smooth({ type: 'catmull-rom', factor: 0.5 });
 
 gradientBg.onFrame= function(event){
   if(anim.paused) return;
-  var currentSpec=fft.analyze();
-  var newHue=[ getColorFromAmplitude(0),getColorFromAmplitude(60),getColorFromAmplitude(122)];
-  var colour= this.fillColor;
-  for(clr in colour.gradient.stops){
-    colour.gradient.stops[clr].color.hue=newHue[clr];
+  if(event.count%5==0){
+    var currentSpec=fft.analyze();
+    var newHue=[ getColorFromAmplitude(256,0,0,25),getColorFromAmplitude(122,0,0,15),getColorFromAmplitude(0,0,0,15)];
+    var colour= this.fillColor;
+    for(clr in colour.gradient.stops){
+      colour.gradient.stops[clr].color.hue=newHue[clr];
+    }
   }
 }
 
