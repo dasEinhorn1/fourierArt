@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Fourier Art</title>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/p5.js"></script>
+    <script src="js/p5.sound.min.js"></script>
+    <script src="js/paper-full.min.js"></script>
+    <script src="js/fourier.js"></script>
+    <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
+    <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+  </head>
+  <body>
+    <header>
+      <h1 class="title">Fourier Art</h1>
+      <ol class="navbar">
+        <li><a href="docs.html">Docs</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="index.html">Visualizer</a></li>
+
+
+      </ol>
+    </header>
+    <main style="float:clear">
+      <!--Two.js applies to div below-->
+      <canvas id="visualizer" resize="true"></canvas>
+
+      <!--All UI for controlling visualization-->
+      <div id="controls">
+        <h3>Visualizer controls</h3>
+        <div id="play-pause">PAUSE</div>
+        <select id="songSelect">
+          <option value="guillotine.mp3">Rap</option>
+          <option value="Jahzzar_Siesta.mp3">Acoustic</option>
+          <option value="WreckingBall.mp3">Pop</option>
+          <option value="skrillex.mp3">Dubstep</option>
+          <option value="IckyThump.mp3">Rock</option>
+        </select>
+      </div>
+    </main>
+    <footer>
+
+    </footer>
+  </body>
+  <script type="text/javascript">
+    $("#play-pause").click(function(e){
+          if ($(e.target).html()=="Pause"){
+            anim.paused=true;
+            mainS.pause();
+            $(e.target).html("Play");
+          }else if ($(e.target).html()=="Play"){
+            anim.paused=false;
+            mainS.play();
+            $(e.target).html("Pause");
+          }else{
+            if(mainS.isPlaying()){
+              anim.paused=true;
+              mainS.pause();
+              $(e.target).html("Play");
+            }else{
+              anim.paused=false;
+              mainS.play();
+              $(e.target).html("Pause");
+            }
+          }
+    });
+    $("#songSelect").change(function(e){
+      if(mainS.isPlaying()){
+        mainS.stop();
+        anim.pause();
+      }
+      mainS=loadSound("media/sound/"+$(e.target).val())
+      setup();
+      anim.play();
+    });
+  </script>
+</html>
