@@ -24,6 +24,9 @@
       </ol>
     </header>
     <main style="float:clear">
+      <div id='load-screen' style='display:none;'>
+        <img src="media/Infinity.svg" alt="loading"/>
+      </div>
       <!--Two.js applies to div below-->
       <canvas id="visualizer" resize="true"></canvas>
 
@@ -38,6 +41,7 @@
           <option value="skrillex.mp3">Dubstep</option>
           <option value="IckyThump.mp3">Rock</option>
         </select>
+        <input id="file-input" type="file" name="name" />
       </div>
     </main>
     <footer>
@@ -45,6 +49,12 @@
     </footer>
   </body>
   <script type="text/javascript">
+    $('#file-input').change( function(event) {
+      var tmppath = URL.createObjectURL(event.target.files[0]);
+      $("#song_path").html(tmppath);
+      changeSong(tmppath);
+    });
+
     $("#play-pause").click(function(e){
           if ($(e.target).html()=="Pause"){
             anim.paused=true;
@@ -67,13 +77,9 @@
           }
     });
     $("#songSelect").change(function(e){
-      if(mainS.isPlaying()){
-        mainS.stop();
-        anim.pause();
-      }
-      mainS=loadSound("media/sound/"+$(e.target).val())
-      setup();
-      anim.play();
+      console.log($(e.target).val())
+      path = "media/sound/" + $(e.target).val();
+      changeSong(path);
     });
   </script>
 </html>

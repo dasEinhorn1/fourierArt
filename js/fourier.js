@@ -3,6 +3,8 @@ var mainS;
 
 fftBins = 256;
 
+watchBins = fftBins;
+
 frameCount = 0;
 amplitudeAvg = 0;
 lastIncrEvent = 0;
@@ -16,32 +18,9 @@ function preload(){
 	mainS = loadSound('media/sound/miloGoingNoPlace.mp3');
 }
 function setup(){
-	try{
-		mainS.setVolume(.1);
-		mainS.play();
-	}catch(e){
-		setTimeout(setup,1000);
-	}
+	mainS.setVolume(.1);
+	mainS.play();
 }
-
-/*function setup()
-{
-	background(0);
-	createCanvas(windowWidth,windowHeight);
-	noStroke();
-	fill(255);
-	textAlign(CENTER);
-	ellipseWidth = 50;
-}
-
-function mouseClicked()
-{
-	if(mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height)
-	{
-		togglePlay();
-	}
-}
-*/
 
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 //accepts a buffer range (for smoothing) and a start and end point
@@ -115,8 +94,6 @@ function getColorArrayFromWaveform()
 		return absolute;
 	});
 
-	console.log(waveform);
-	console.log(waveAbsolute);
 
 	var waveColor = waveAbsolute.map(function(absVal){
 		var col = (absVal / (waveMax - waveMin))*360;
@@ -132,14 +109,21 @@ function calculateAverage(fourierArray)
 	frameCount++;
 
 	//calculate avg amplitude for this frame
-	for(f = 0; f < fftBins; f++)
+	for(var f = 0; f < fftBins; f++)
 	{
-		amplitudeTotal += fourierArray[f];
+		if (amplitudeTotal != undefined) {
+			amplitudeTotal += fourierArray[f];
+		} else {
+			amplitudeTotal = fourierArray[f];
+		}
 	}
 	var frameAvg = amplitudeTotal / fftBins;
 
 	var accAmplitude = amplitudeAvg * (frameCount - 1) //turn amplitudeAvg back into an accumulated sum of averages
+
+	// set global average
 	amplitudeAvg = (accAmplitude + frameAvg) / frameCount;
+	// console.log(amplitudeAvg);
 	return amplitudeAvg;
 }
 
@@ -147,13 +131,13 @@ function calculateAverage(fourierArray)
 function getSubdividedAvg(fourierArray)
 {
 	var subNum = 16;
-	var binSize = fftBins/subNum;
+	var binSize = Math.floor(fourierArray.length/subNum);
 	var dividedAvgs = [];
 	var total = 0;
 
 	for(b = 0; b < subNum; b++) //iterate through each bin
 	{
-		for(f = b*16; f < 16*(b+1); f++) //iterate through each frequency level
+		for(f = b*binSize; f < binSize * (b+1); f++) //iterate through each frequency level
 		{
 			total += fourierArray[f];
 		}
@@ -189,26 +173,34 @@ function detectPeak()
 	}
 }
 
-//trim 'zero tail' off of the end of the fourier transform array
+// trim 'zero tail' off of the end of the fourier transform array
 function trimZeroes(fourierArray)
 {
-	var tolerance=4;
+	var tolerance = 0;
+
 	var breakPoint = fourierArray.length; //do not shorten array by default
-	for(f=fourierArray.length-1; f > 0; f--)
-	{
+
+	for(var f = fourierArray.length - 1; f > 0; f--) {
 		//when non-zero is detected, break from loop and trim array
-		if(fourierArray[f]!=0)
+		breakPoint = f;
+		if(Math.abs(fourierArray[f]) > tolerance)
 		{
 			breakPoint = f + 1;
 			break;
 		}
 	}
-	trimmedArray = fourierArray.slice(0,breakPoint);
+	trimmedArray = fourierArray.slice(0, breakPoint);
+	for (var f = 0; f < trimmedArray.length; f++) {
+		breakPoint = f;
+		//when non-zero is detected, break from loop and trim array
+		if(Math.abs(fourierArray[f]) > tolerance)
+		{
+			breakPoint = f;
+			break;
+		}
+	}
+	trimmedArray = trimmedArray.slice(breakPoint, trimmedArray.length);
 	return trimmedArray;
-}
-
-function draw()
-{
 }
 
 var getBarPos= function(freq,amplitude,maxW,maxH){// based on frequency and amplitude, I make a paper Point for the top left of each rect
@@ -236,4 +228,24 @@ function togglePlay()
 	{
 		mainS.play();
 	}
+}
+
+var startLoad = function() {
+	console.log("LOAD");
+	$("#load-screen").css('display', 'block');
+}
+var endLoad = function() {
+console.log("END LOAD");
+	$("#load-screen").css('display', 'none');
+}
+
+var changeSong = function(path) {
+	startLoad();
+	anim.pause();
+	mainS.stop();
+	mainS.setPath(path, function(){
+		mainS.play();
+		anim.play();
+		endLoad();
+	});
 }
