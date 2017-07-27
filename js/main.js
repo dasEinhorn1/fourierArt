@@ -10,10 +10,10 @@ Animator=function(){
     this.paused= !this.paused;
   },
   this.play=function(){
-    paused=false;
+    this.paused=false;
   },
   this.pause=function(){
-      paused=true;
+    this.paused=true;
   }
   this.reset=function(){
     resetFftCircles(anim);
@@ -182,7 +182,7 @@ fftCircles.onFrame=function(event){
   }
   fftCircles.bringToFront();
   fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
-  if(!mainS.isPlaying()){
+  if(!q.isPlaying()){
     anim.reset();
   }
 }

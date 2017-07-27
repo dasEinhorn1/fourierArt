@@ -1,5 +1,4 @@
 var freqProximity;
-var mainS;
 
 fftBins = 256;
 
@@ -13,14 +12,6 @@ increaseEventBuffer = 20; //minimum of number of frames that must pass between e
 
 fft = new p5.FFT(0.8,fftBins);
 peakDetect = new p5.PeakDetect(0, 7000, 0.23);
-
-function preload(){
-	mainS = loadSound('media/sound/miloGoingNoPlace.mp3');
-}
-function setup(){
-	mainS.setVolume(.1);
-	mainS.play();
-}
 
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 //accepts a buffer range (for smoothing) and a start and end point
@@ -216,36 +207,4 @@ var getAllBarPos=function(spectrum,w,h){//gets all positions
 		positions.push(getBarPos(i,amp,w,h));
 	}
 	return positions;
-}
-
-function togglePlay()
-{
-	if(mainS.isPlaying())
-	{
-		mainS.pause();
-	}
-	else
-	{
-		mainS.play();
-	}
-}
-
-var startLoad = function() {
-	console.log("LOAD");
-	$("#load-screen").css('display', 'block');
-}
-var endLoad = function() {
-console.log("END LOAD");
-	$("#load-screen").css('display', 'none');
-}
-
-var changeSong = function(path) {
-	startLoad();
-	anim.pause();
-	mainS.stop();
-	mainS.setPath(path, function(){
-		mainS.play();
-		anim.play();
-		endLoad();
-	});
 }
