@@ -67,7 +67,7 @@
         </div>
         <div id="song-add" class="submenu pop-out">
           <label for="sound-file">Upload a file:</label>
-          <input id="file-input" type="file" name="sound-file"/>
+          <input id="file-input" type="file" name="sound-file" multiple='true'/>
           <label for="sound-link">Enter a Url:</label>
           <input id="link-input" type="text" name="sound-link" placeholder="www.example.com/1.mp3"/>
         </div>
@@ -83,9 +83,19 @@
   </body>
   <script type="text/javascript">
     $('#file-input').change( function(event) {
-      var tmppath = URL.createObjectURL(event.target.files[0]);
-      q.addSong(tmppath, function(){}, event.target.files[0].name);
+      $.each(event.target.files, function(k,v) {
+        var tmppath = URL.createObjectURL(v);
+        q.addSong(tmppath, function(){}, v.name);
+      });
     });
+
+    $('#link-input').on('keypress', function(event) {
+      if (event.which == 13) {
+        console.log("adding");
+        q.addSong(event.target.value, function(){});
+      }
+    })
+
     $("#next-song").click(function(e) {
       q.next();
     });
