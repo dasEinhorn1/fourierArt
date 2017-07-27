@@ -13,7 +13,9 @@ fft = new p5.FFT(0.8,fftBins);
 peakDetect = new p5.PeakDetect(0, 7000, 0.23);
 
 function preload(){
+	j = loadSound('http://192.168.1.146:8080/hello');
 	mainS = loadSound('media/sound/miloGoingNoPlace.mp3');
+
 }
 function setup(){
 	try{
