@@ -7,8 +7,7 @@
     <script src="js/p5.js"></script>
     <script src="js/p5.sound.min.js"></script>
     <script src="js/paper-full.min.js"></script>
-    <script src="js/fourier.js"></script>
-    <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
+    <script src="https://use.fontawesome.com/cd94f3602e.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
   </head>
@@ -19,64 +18,108 @@
         <li><a href="docs.html">Docs</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="index.html">Visualizer</a></li>
-
-
       </ol>
     </header>
-    <main style="float:clear">
+    <main>
+      <div id='load-screen' style='display:none;'>
+        <img src="media/Infinity.svg" alt="loading"/>
+      </div>
       <!--Two.js applies to div below-->
       <canvas id="visualizer" resize="true"></canvas>
 
       <!--All UI for controlling visualization-->
-      <div id="controls">
-        <h3>Visualizer controls</h3>
-        <div id="play-pause">PAUSE</div>
-        <select id="songSelect">
-          <option value="guillotine.mp3">Rap</option>
-          <option value="Jahzzar_Siesta.mp3">Acoustic</option>
-          <option value="WreckingBall.mp3">Pop</option>
-          <option value="skrillex.mp3">Dubstep</option>
-          <option value="IckyThump.mp3">Rock</option>
-        </select>
-      </div>
+      <div id="vis-menu">
+        <div id='queue' class="submenu">
+          <div id = 'queue-controls'>
+            <button class='btn btn-block circle' type="button" name="add-song">
+              <i><i class="fa fa-plus" aria-hidden="true"></i></i>
+            </button>
+            <button class='btn btn-block' type="button" name="reorder">Edit</button>
+            <button class='btn btn-block' type="button" name="remove-all">Remove</button>
+          </div>
+          <div class="playlist-wrapper">
+            <table class='playlist'>
+              <tr class='playlist-header'>
+                <th>
+                  <i class="fa fa-volume-up" aria-hidden="true"
+                    style='visibility:hidden'></i>
+                </th>
+                <th>Song Title</th>
+                <th>Duration</th>
+              </tr>
+            </table>
+          </div>
+          <div id="controls">
+            <button id="prev-song" class='btn btn-block' type="button" name="next">
+              <i class="fa fa-step-backward" aria-hidden="true"></i>
+            </button>
+            <div id="play-pause" class='btn btn-block circle'>
+              <i class="fa fa-pause" aria-hidden="true"></i>
+              <i class="fa fa-play" aria-hidden="true" style='display:none'></i>
+            </div>
+            <button id="next-song" class='btn btn-block' type="button" name="next">
+              <i class="fa fa-step-forward" aria-hidden="true"></i>
+            </button>
+            <button id="repeat" class='btn btn-block' type="button" name="loop">
+              <i class="fa fa-retweet" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+        <div id="song-add" class="submenu pop-out">
+          <label for="sound-file">Upload a file:</label>
+          <input id="file-input" type="file" name="sound-file" multiple='true'/>
+          <label for="sound-link">Enter a Url:</label>
+          <input id="link-input" type="text" name="sound-link" placeholder="www.example.com/1.mp3"/>
+        </div>
+
+    </div>
     </main>
     <footer>
 
     </footer>
+    <script src="js/player.js"></script>
+    <script src="js/fourier.js"></script>
+    <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
   </body>
   <script type="text/javascript">
-  
+    $('#file-input').change( function(event) {
+      $.each(event.target.files, function(k,v) {
+        var tmppath = URL.createObjectURL(v);
+        q.addSong(tmppath, function(){}, v.name);
+      });
+    });
 
+    $('#link-input').on('keypress', function(event) {
+      if (event.which == 13) {
+        console.log("adding");
+        q.addSong(event.target.value, function(){});
+      }
+    })
+
+    $("#next-song").click(function(e) {
+      q.next();
+    });
+    $("#prev-song").click(function(e) {
+      q.previous();
+    });
+
+    $('#repeat').click(function(e) {
+      $(e.target).parent().toggleClass('selected');
+      q.toggleRepeat();
+    });
 
     $("#play-pause").click(function(e){
-          if ($(e.target).html()=="Pause"){
-            anim.paused=true;
-            mainS.pause();
-            $(e.target).html("Play");
-          }else if ($(e.target).html()=="Play"){
-            anim.paused=false;
-            mainS.play();
-            $(e.target).html("Pause");
-          }else{
-            if(mainS.isPlaying()){
-              anim.paused=true;
-              mainS.pause();
-              $(e.target).html("Play");
-            }else{
-              anim.paused=false;
-              mainS.play();
-              $(e.target).html("Pause");
-            }
-          }
+      var play = playButtonUpdate();
+      if (play) {
+        q.pause();
+      } else {
+        q.play();
+      }
     });
     $("#songSelect").change(function(e){
-      if(mainS.isPlaying()){
-        mainS.stop();
-        anim.pause();
-      }
-      mainS=loadSound("media/sound/"+$(e.target).val())
-      setup();
-      anim.play();
+      console.log($(e.target).val())
+      path = "media/sound/" + $(e.target).val();
+      q.addSong(path);
     });
   </script>
 </html>

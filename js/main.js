@@ -10,10 +10,10 @@ Animator=function(){
     this.paused= !this.paused;
   },
   this.play=function(){
-    paused=false;
+    this.paused=false;
   },
   this.pause=function(){
-      paused=true;
+    this.paused=true;
   }
   this.reset=function(){
     resetFftCircles(anim);
@@ -155,16 +155,17 @@ gradientBg.onFrame= function(event){
     }
   }
 }
+// the directions of the circles
 var dirs=[1,-1];
 fftCircles.onFrame=function(event){
-  if(event.count%3!=0) return;
   if(anim.paused) return;
-  var currentAvgs=getSubdividedAvg(fft.analyze());//get averages
-  for(var i in fftCircles.children){
-    var currChild=fftCircles.children[i];
-    for(var j=0;j<2;j++){
+  var currentAvgs = getSubdividedAvg(trimZeroes(fft.analyze()));//get averages
+  for (var i in fftCircles.children) {
+    var currChild = fftCircles.children[i];
+    for (var j = 0; j < 2; j++){
       var currCircle=currChild.children[j];
-      if(currCircle.position.y <= fftCircles.bounds.center.y-300 && dirs[j]==-1){
+      if (currCircle.position.y <= fftCircles.bounds.center.y - 300
+        && dirs[j] == -1) {
         currCircle.bringToFront();
         dirs[0]*=-1;
         dirs[1]*=-1;
@@ -181,7 +182,7 @@ fftCircles.onFrame=function(event){
   }
   fftCircles.bringToFront();
   fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
-  if(!mainS.isPlaying()){
+  if(!q.isPlaying()){
     anim.reset();
   }
 }
