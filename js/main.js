@@ -1,37 +1,26 @@
 dimensions={
   w:parseInt($(window).innerWidth()),
   h:parseInt($(window).innerHeight()),
-  circle: 10
+  circle: 20
 }
 
-Animator=function(){
-  this.paused=false,
+Animator = function(){
+  this.paused = false;
   this.toggle=function(){
     this.paused= !this.paused;
-  },
+  };
   this.play=function(){
     this.paused=false;
-  },
+  };
   this.pause=function(){
     this.paused=true;
-  }
+  };
   this.reset=function(){
     resetFftCircles(anim);
-  },
-  this.trimPath=function(pth){// constructs path, but trims of trailing zeros and scales as necessary.
-    count=0;
-    for(var i=pth.segments.length-1; i>-1; i-=1){//loop from last to first.
-      if(pth.segments[i].point.y == dimensions.h/3 || pth.segments[i].point.y==NaN){
-        console.log("Slowly but surely")
-        count+=1;
-      }else{
-        break;
-      }
-    }
-    return 256-count;
-  }
+  };
 }
-anim=new Animator()
+
+anim = new Animator();
 
 function resizeDimensions(elem,width,height){
     //calc scale coefficients and store current position
@@ -72,8 +61,8 @@ var drawBars=function(points){
 */
 
 var fftCircles=new Group();
-for(var i=0; i<16; i++){ // i(totalwidth/32)+totalwidth/16
-  c1= new Path.Circle(new Point((i*dimensions.w/16),dimensions.h/2), dimensions.circle);
+for(var i = 0; i < 16; i++){ // i(totalwidth/32)+totalwidth/16
+  c1= new Path.Circle(new Point((i*dimensions.w/16), dimensions.h/2), dimensions.circle);
   c1.fillColor="white";
   c2=c1.clone();
   c1.fillColor="black";
@@ -92,7 +81,7 @@ var resetFftCircles = function(anim){
 }
 var waveFormCrv=new Path();
 waveFormCrv.strokeColor='black';
-waveFormCrv.strokeWidth= 20;
+waveFormCrv.strokeWidth= 5;
 for(var i=0; i<256; i++){
   waveFormCrv.add(new Point(i*(dimensions.w/255),0));
 }
@@ -134,7 +123,7 @@ console.log(allBars.position)
 */
 fftCircles.bringToFront();
 waveFormCrv.bringToFront();
-waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.5 });
+waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.8 });
 
 var bright=0;
 gradientBg.onFrame= function(event){
@@ -157,6 +146,7 @@ gradientBg.onFrame= function(event){
 }
 // the directions of the circles
 var dirs=[1,-1];
+var gravity = 5;
 fftCircles.onFrame=function(event){
   if(anim.paused) return;
   var currentAvgs = getSubdividedAvg(trimZeroes(fft.analyze()));//get averages
@@ -174,7 +164,8 @@ fftCircles.onFrame=function(event){
         dirs[0]*=-1;
         dirs[1]*=-1;
       }
-      var dy=((currentAvgs[i]/50));
+      var dy=((currentAvgs[i]/40));
+
       //currCircle.(currentAvgs[i]/currCircle.scaling, currCircle.bounds.center);;
       currCircle.translate(new Point(0,dy*dirs[j]));// here I set all my y values. for half they are positive.
     }
@@ -197,6 +188,7 @@ waveFormCrv.onFrame=function(event){
   }
 }
 var wv2=waveFormCrv.clone();
+wv2.strokeColor='white';
 wv2.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/3);
 wv2.onFrame=function(event){
   if(anim.paused) return;

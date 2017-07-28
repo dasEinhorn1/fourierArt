@@ -42,7 +42,7 @@ function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins - 1)
 			var proximity = freqProximity;
 		}
 	}
-	var hueValue = (freq/(end-start))*360;
+	var hueValue = (freq/(end-start)*60) + 180;
 	return hueValue;
 }
 

@@ -1,4 +1,4 @@
-const DEFAULT_SONG = "media/sound/load.mp3";
+const DEFAULT_SONG = "media/sound/Death_Grips_-_Guillotine_(It_goes_Yah).mp3";
 const VOLUME = .1;
 var mainS;
 var q;
@@ -12,6 +12,9 @@ var Song = function(path, id, name=undefined) {
 Song.prototype.load = function (callback) {
   this.loader = loadSound(this.path, function() {
     callback();
+  },
+  function(){
+    showErrorMessage("Error adding song");
   });
   this.loader.setVolume(VOLUME)
 };
@@ -43,6 +46,7 @@ var PlayQueue = function(target) {
   this.playlist = [];
   this.currentSongIndex = 0;
   this.repeat = false;
+  this.changing = false;
 }
 PlayQueue.prototype.getCurrentSong = function() {
   return this.playlist[this.currentSongIndex]
@@ -59,7 +63,22 @@ PlayQueue.prototype.isPlaying = function() {
 
   return this.now().isPlaying();
 }
-
+PlayQueue.prototype.changeSong = function(id, callback) {
+  if (this.changing) {
+    return;
+  }
+  this.changing = true;
+  if (id != undefined) {
+    var i = this.getSongIndex(id);
+    if (i != -1 && i != this.currentSongIndex) {
+      this.stop();
+      this.currentSongIndex = i;
+      this.stop();
+      this.play();
+    }
+  }
+  callback();
+}
 PlayQueue.prototype.play = function() {
   if (this.now().isLoaded()) {
     playButtonUpdate();
@@ -121,6 +140,7 @@ PlayQueue.prototype.length= function() {
 
 PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
   var i = this.length();
+
   var s = new Song(path, i, name);
   var queue = this;
   s.load(function(){
@@ -130,10 +150,17 @@ PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
     s.setOnEnded(function() {
       queue.next();
     });
+    if (i == 0) {
+      queue.currentSongIndex = i
+      queue.play();
+    }
     if(cb) {
       cb();
     }
   });
+}
+PlayQueue.prototype.isPlayingById = function(id) {
+  return this.getCurrentSong().id == id;
 }
 PlayQueue.prototype.isPlayingSong = function(song) {
   return this.now() == song.loader;
@@ -154,13 +181,13 @@ PlayQueue.prototype.toggleRepeat = function() {
   this.repeat = !this.repeat;
 }
 
-PlayQueue.prototype.getSong = function(id) {
+PlayQueue.prototype.getSongIndex = function(id) {
   for (var i = 0; i < this.length(); i++) {
     if (this.playlist[i].id == id) {
-      return this.playlist[i];
+      return i;
     }
   }
-  return;
+  return -1;
 }
 
 PlayQueue.prototype.changePlaying = function(id) {
@@ -191,12 +218,12 @@ PlayQueue.prototype.reloadSongListing = function() {
 
 function preload(){
   q = new PlayQueue(".playlist");
-  q.addSong(DEFAULT_SONG, function() { q.play(); });
+  //q.addSong(DEFAULT_SONG, function() { q.play(); });
 }
 function setup(){
 	//mainS.setVolume(VOLUME);
 	//mainS.play();
-  q.play()
+  //q.play()
 }
 
 function togglePlay() {
@@ -230,13 +257,29 @@ var playButtonUpdate = function() {
   }
 }
 
-var changeSong = function(path) {
-	startLoad();
-	anim.pause();
-	mainS.stop();
-	mainS.setPath(path, function(){
-		mainS.play();
-		anim.play();
-		endLoad();
-	});
+var showErrorMessage = function(msg) {
+	alert(msg);
+}
+
+// Author:  Jacek Becela
+// Source:  http://gist.github.com/399624
+// License: MIT
+
+jQuery.fn.single_double_click = function(single_click_callback, double_click_callback, timeout) {
+  return this.each(function(){
+    var clicks = 0, self = this;
+    jQuery(this).click(function(event){
+      clicks++;
+      if (clicks == 1) {
+        setTimeout(function(){
+          if(clicks == 1) {
+            single_click_callback.call(self, event);
+          } else {
+            double_click_callback.call(self, event);
+          }
+          clicks = 0;
+        }, timeout || 300);
+      }
+    });
+  });
 }

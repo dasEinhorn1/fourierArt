@@ -13,6 +13,7 @@ main{
 
 h1, h2, h3 {
   font-family:'Fjalla One', sans-serif;
+  margin:0;
 }
 
 header {
@@ -23,6 +24,11 @@ header {
   overflow-y:hidden;
   height: 4.5em;
   padding-bottom: .5em;
+}
+
+.float-container {
+  clear: both;
+  overflow: hidden;
 }
 
 .title-wrapper {
@@ -151,6 +157,14 @@ button::-moz-focus-inner {
   transform: translateY(-50%);
 }
 
+#q-menu-popup {
+  z-index:3;
+  position: fixed;
+  top: 100%;
+  left: 100%;
+  transform: translate(-150%,-150%);
+}
+
 #vis-menu {
   position: absolute;
   padding: 1em;
@@ -172,7 +186,7 @@ button::-moz-focus-inner {
 }
 
 .pop-out-wrapper{
-  /*display: none;*/
+  display: none;
   position: fixed;
   width: 100%;
   height: 100%;
@@ -188,6 +202,18 @@ button::-moz-focus-inner {
   font-size: 2em;
   padding: 1em 1em;
   background-color: rgba(22,25,37,.8);
+  overflow: hidden;
+}
+
+#song-add .close-wrap {
+  margin-top: -1em;
+}
+
+#song-add .close-btn {
+  top: 0;
+  left: 100%;
+  transform: translate(-50%);
+
 }
 
 #controls h3 {
@@ -203,7 +229,6 @@ button::-moz-focus-inner {
 }
 
 .btn:hover{
-  cursor:pointer;
   background-color: #23395B;
 }
 
@@ -229,10 +254,58 @@ button::-moz-focus-inner {
   padding: 0.5em 0.5em;
 }
 
+.close-wrap {
+
+}
+
+.close-btn {
+  cursor: pointer;
+  display: block;
+  text-align: center;
+  background-color: transparent;
+  margin: 0;
+  font-size: 1em;
+  width: 1em;
+  padding: 5px 5px;
+}
+.close-btn:hover {
+  text-decoration: underline;
+  background-color: transparent;
+}
+
 .file-input {
   width: 0px;
   height: 0px;
   overflow: hidden;
+}
+
+.sound-link-wrap {
+  text-align: left;
+  margin-left: auto;
+  margin-right: auto;
+  display: inline-block;
+}
+
+.link-box-wrap {
+  float: left;
+  margin-right: 5px;
+}
+
+#link-input {
+  font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
+  height: 1.4em;
+  display: block;
+}
+
+.link-box-wrap + .btn {
+  float: right;
+  box-sizing: border-box;
+  font-size: 1em;
+  width: 1.4em;
+  height: 1.4em;
+  display: block;
 }
 
 #play-pause {
@@ -259,6 +332,10 @@ button::-moz-focus-inner {
 .playlist-header {
   text-align: left;
   background-color: rgba(0,0,0,.5);
+}
+
+.song {
+  cursor: pointer;
 }
 
 .playlist .song,
