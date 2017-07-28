@@ -34,31 +34,20 @@ function resizeDimensions(elem,width,height){
     elem.position = newPos;
 }
 
-/*var allBars=new Group({});
-var drawBar = function(pt){
-  var bar= new Path.Rectangle({
-    topLeft:pt,
-    bottomRight:[pt[0]+(1.875),pt[1]+(1920/255)],
-  });
-  bar.fillColor="green";
-  bar.strokeColor="green";
-  allBars.addChild(bar);
-  return bar;
-}
-var updateBar=function(id,pt){
-  resizeDimensions(allBars.children[id],pt[0],pt[1]);// resize bar existing at this points
-}
-var updateBars=function(points){
-  for(i in points){
-    updateBar(i,points[i]);
+var durationLoop = new Group();
+durationLoop.bringToFront();
+var previousTime = 0;
+durationLoop.onFrame = function(e) {
+  var timeObj = q.time();
+  if (Math.round(previousTime) != Math.round(timeObj.current)) {
+
+    $('.time.time-current').html(timeToStringFormat(timeObj.current, TIME_FORMAT));
+    $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
+    $('.time.time-left').html(timeToStringFormat(timeObj.diff, TIME_FORMAT));
+
   }
+  previousTime = timeObj.current;
 }
-var drawBars=function(points){
-  for (i in points){
-    drawBar(points[i]);
-  }
-}
-*/
 
 var fftCircles=new Group();
 for(var i = 0; i < 16; i++){ // i(totalwidth/32)+totalwidth/16
@@ -108,25 +97,12 @@ gradientBg.fillColor= {
   destination: gradientBg.bounds.rightCenter
 };
 
-//initialize bars to populate stuff
-/*
-drawBars(getAllBarPos(fft.analyze(),dimensions.w,dimensions.h));
-allBars.bringToFront();
-allBars.position=new Point(dimensions.w/2,dimensions.h/2);
-allBars.onFrame=function(event){
-  if(event.count%10==0){
-    var currentSpec=fft.analyze();
-    updateBars(getAllBarPos(currentSpec));
-  }
-}
-console.log(allBars.position)
-*/
 fftCircles.bringToFront();
 waveFormCrv.bringToFront();
 waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.8 });
 
 var bright=0;
-gradientBg.onFrame= function(event){
+gradientBg.onFrame = function(event){
   if(anim.paused) return;
   if(event.count%1==0){
     var currentSpec=fft.analyze();
@@ -147,7 +123,7 @@ gradientBg.onFrame= function(event){
 // the directions of the circles
 var dirs=[1,-1];
 var gravity = 5;
-fftCircles.onFrame=function(event){
+fftCircles.onFrame = function(event){
   if(anim.paused) return;
   var currentAvgs = getSubdividedAvg(trimZeroes(fft.analyze()));//get averages
   for (var i in fftCircles.children) {
@@ -200,6 +176,7 @@ wv2.onFrame=function(event){
     wv2.position=new Point(wv2.bounds.width/2,dimensions.h/3);
   }
 };
+
 $(window).resize(function(e){
     //var oldPos= gradientBg.bottomRight;
     dimensions.w= $(window).innerWidth();

@@ -39,7 +39,7 @@
           <h1 style='float:left'>Queue</h1>
           <div class="close-wrap">
             <div class="btn close-btn" data-hide='#vis-menu'
-              data-show='#q-menu-popup'>x</div>
+              data-show='#q-menu-popup'></div>
           </div>
         </div>
         <div id='queue' class="submenu">
@@ -62,20 +62,32 @@
               </tr>
             </table>
           </div>
-          <div id="controls">
-            <button id="prev-song" class='btn btn-block' type="button" name="next">
-              <i class="fa fa-step-backward" aria-hidden="true"></i>
-            </button>
-            <div id="play-pause" class='btn btn-block circle'>
-              <i class="fa fa-pause" aria-hidden="true"></i>
-              <i class="fa fa-play" aria-hidden="true" style='display:none'></i>
+          <div class="controls-wrap">
+            <div class="controls">
+              <button class='btn btn-block shuffle' type="button" name="loop">
+                <i class="fa fa-random" aria-hidden="true"></i>
+              </button>
+              <button class='btn btn-block prev-song' type="button" name="next">
+                <i class="fa fa-step-backward" aria-hidden="true"></i>
+              </button>
+              <div class='btn btn-block circle play-pause'>
+                <i class="fa fa-pause" aria-hidden="true"></i>
+                <i class="fa fa-play" aria-hidden="true" style='display:none'></i>
+              </div>
+              <button class='btn btn-block next-song' type="button" name="next">
+                <i class="fa fa-step-forward" aria-hidden="true"></i>
+              </button>
+              <button class='btn btn-block repeat' type="button" name="loop">
+                <i class="fa fa-retweet" aria-hidden="true"></i>
+              </button>
             </div>
-            <button id="next-song" class='btn btn-block' type="button" name="next">
-              <i class="fa fa-step-forward" aria-hidden="true"></i>
-            </button>
-            <button id="repeat" class='btn btn-block' type="button" name="loop">
-              <i class="fa fa-retweet" aria-hidden="true"></i>
-            </button>
+          </div>
+          <div class="time-bar-wrap">
+            <div class="time time-current">0:00s</div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar"></div>
+            </div>
+            <div class="time time-left">0:00s</div>
           </div>
         </div>
     </div>
@@ -122,6 +134,41 @@
       });
     });
 
+    $(window).on('keydown', function(e) {
+      console.log(e.which);
+      if (e.which == KEYS.SPACE) {
+        var play = playButtonUpdate();
+        if (play) {
+          q.pause();
+        } else {
+          q.play();
+        }
+      } else if (e.which == KEYS.LEFT) {
+        q.previous();
+      } else if (e.which == KEYS.RIGHT) {
+        q.next();
+      } else if (e.which == KEYS.Q) {
+        if ($('#vis-menu').css('display') == 'none') {
+          $('#vis-menu').css('display', 'block');
+          $('#q-menu-popup').css('display','none');
+        } else {
+          $('#vis-menu').css('display','none');
+          $('#q-menu-popup').css('display', 'block');
+        }
+      } else if (e.which == KEYS.R) {
+        $('.repeat').toggleClass('selected');
+        q.toggleRepeat();
+      } else if (e.which == KEYS.A) {
+        if ($('.pop-out-wrapper').css('display') == 'none') {
+          $('.pop-out-wrapper').css('display', 'block');
+        } else {
+          $('.pop-out-wrapper').css('display', 'none');
+        }
+      } else if (e.which == KEYS.ESC) {
+        $('.close-btn').click()
+      }
+    });
+
     $(".btn-file").click(function(e) {
       $('#song-file-input').click();
     });
@@ -131,25 +178,26 @@
     });
 
     $('#link-input').on('keypress', function(event) {
-      if (event.which == 13) {
+      event.stopPropagation();
+      if (event.which == KEYS.ENTER) {
         console.log("adding");
         q.addSong(event.target.value, function(){});
       }
     })
 
-    $("#next-song").click(function(e) {
+    $(".next-song").click(function(e) {
       q.next();
     });
-    $("#prev-song").click(function(e) {
+    $(".prev-song").click(function(e) {
       q.previous();
     });
 
-    $('#repeat').click(function(e) {
+    $('.repeat').click(function(e) {
       $(e.currentTarget).toggleClass('selected');
       q.toggleRepeat();
     });
 
-    $("#play-pause").click(function(e) {
+    $(".play-pause").click(function(e) {
       var play = playButtonUpdate();
       if (play) {
         q.pause();
@@ -168,7 +216,7 @@
     })
 
     $("#add-song").click(function(e) {
-      $('.pop-out-wrapper').css('display', 'block')
+      $('.pop-out-wrapper').css('display', 'block');
     })
 
     $('#q-menu-popup').click(function(e){

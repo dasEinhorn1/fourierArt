@@ -216,7 +216,20 @@ button::-moz-focus-inner {
 
 }
 
-#controls h3 {
+#vis-menu .controls-wrap {
+  position: relative;
+}
+
+.controls {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%);
+}
+
+.controls h3 {
   margin-top: 0px;
 }
 
@@ -308,10 +321,15 @@ button::-moz-focus-inner {
   display: block;
 }
 
-#play-pause {
+.btn.circle.play-pause {
   height: 50px;
   width: 50px;
   font-size: 1.5em;
+}
+
+.controls .btn:not(.play-pause) {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .playlist-wrapper{
@@ -357,4 +375,34 @@ button::-moz-focus-inner {
 
 .playlist .song:nth-child(odd) {
   background-color: rgba(0,0,0,.4);
+}
+
+.time-bar-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.time {
+  flex: 1;
+  text-align: center;
+}
+.time-left::before {
+  content: '-';
+}
+
+.progress-bar-wrap {
+  background-color: rgba(56, 68, 65, .5);
+  overflow: hidden;
+  border-radius: 3px;
+  box-sizing: border-box;
+  flex: 3;
+  height: 10px
+}
+
+.progress-bar {
+  box-sizing: border-box;
+  height: 100%;
+  border-radius: 3px;
+  width : 0px;
+  background-color: #CBF7ED;
 }

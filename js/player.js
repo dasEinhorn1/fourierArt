@@ -1,7 +1,38 @@
 const DEFAULT_SONG = "media/sound/Death_Grips_-_Guillotine_(It_goes_Yah).mp3";
 const VOLUME = .1;
+const TIME_FORMAT = [':', ':','']
+
+const KEYS = {
+  UP : 38,
+  DOWN : 40,
+  LEFT : 37,
+  RIGHT : 39,
+  SPACE : 32,
+  ENTER : 36,
+  Q : 81,
+  R : 82,
+  A : 65,
+  ESC : 27,
+}
+
 var mainS;
 var q;
+
+function timeToStringFormat(seconds, delimeters=[]) {
+  var hours = Math.floor(seconds / 3600);
+  seconds = seconds % 3600;
+  var minutes = Math.floor(seconds / 60);
+  seconds = Math.round(seconds % 60);
+  var str = '';
+  if (hours > 0) {
+    str += hours + (delimeters[0] || 'h ');
+  }
+  if (seconds < 10) {
+    seconds = '0' + seconds;
+  }
+  str += minutes + (delimeters[1] || 'm ') + seconds + (delimeters[2] || 's');
+  return str;
+}
 
 var Song = function(path, id, name=undefined) {
   this.path = path;
@@ -23,18 +54,12 @@ Song.prototype.duration = function() {
   return this.loader.duration();
 }
 
+Song.prototype.currentTime = function() {
+  return this.loader.currentTime();
+}
+
 Song.prototype.getDurationString = function () {
-  var seconds = this.duration();
-  var hours = Math.floor(seconds / 3600);
-  seconds = seconds % 3600;
-  var minutes = Math.floor(seconds / 60);
-  seconds = Math.floor(seconds % 60);
-  var s = '';
-  if (hours > 0) {
-    s += hours + "h ";
-  }
-  s += minutes + "m " + seconds + "s";
-  return s;
+  return timeToStringFormat(this.duration());
 };
 
 Song.prototype.setOnEnded = function(callback) {
@@ -47,13 +72,30 @@ var PlayQueue = function(target) {
   this.currentSongIndex = 0;
   this.repeat = false;
   this.changing = false;
-}
+};
+
 PlayQueue.prototype.getCurrentSong = function() {
-  return this.playlist[this.currentSongIndex]
-}
+  return this.playlist[this.currentSongIndex];
+};
+
 PlayQueue.prototype.now = function() {
   return this.playlist[this.currentSongIndex].loader;
-}
+};
+
+PlayQueue.prototype.time = function() {
+  var timeObj = {
+    current : 0,
+    total : 0,
+    diff : 0
+  };
+  if (!this.isPlaying()) {
+    return timeObj;
+  }
+  timeObj.current = this.getCurrentSong().currentTime();
+  timeObj.total = this.getCurrentSong().duration();
+  timeObj.diff = timeObj.total - timeObj.current;
+  return timeObj;
+};
 
 PlayQueue.prototype.isPlaying = function() {
   if (this.playlist[this.currentSongIndex] == undefined)
