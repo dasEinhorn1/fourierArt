@@ -8,12 +8,15 @@
     <script src="js/p5.sound.min.js"></script>
     <script src="js/paper-full.min.js"></script>
     <script src="https://use.fontawesome.com/cd94f3602e.js"></script>
-    <link href="https://fonts.googleapis.com/css?family=Baloo+Bhaina" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/main.css"/>
   </head>
   <body>
     <header>
-      <h1 class="title">Fourier Art</h1>
+      <div class="title-wrapper">
+        <h1 class='title'>Fourier Art</h1>
+        <h3 class="subtitle">Music visualizer</h3>
+      </div>
       <ol class="navbar">
         <li><a href="docs.html">Docs</a></li>
         <li><a href="about.html">About</a></li>
@@ -65,14 +68,25 @@
             </button>
           </div>
         </div>
-        <div id="song-add" class="submenu pop-out">
-          <label for="sound-file">Upload a file:</label>
-          <input id="file-input" type="file" name="sound-file" multiple='true'/>
+    </div>
+    <div class="pop-out-wrapper">
+      <div id="song-add" class="pop-out center">
+        <div class="">
+          <label for="sound-file" class='btn btn-file'>
+            Upload a song
+            <i class='fa fa-upload'></i>
+          </label>
+          <input id="song-file-input" class='file-input'
+            type="file" name="sound-file" multiple='false'/>
+        </div>
+        <p>&mdash; or &mdash;</p>
+        <div class="">
           <label for="sound-link">Enter a Url:</label>
           <input id="link-input" type="text" name="sound-link" placeholder="www.example.com/1.mp3"/>
         </div>
-
+      </div>
     </div>
+
     </main>
     <footer>
 
@@ -82,7 +96,7 @@
     <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
   </body>
   <script type="text/javascript">
-    $('#file-input').change( function(event) {
+    $('#song-file-input').change( function(event) {
       $.each(event.target.files, function(k,v) {
         var tmppath = URL.createObjectURL(v);
         q.addSong(tmppath, function(){}, v.name);
@@ -116,10 +130,8 @@
         q.play();
       }
     });
-    $("#songSelect").change(function(e){
-      console.log($(e.target).val())
-      path = "media/sound/" + $(e.target).val();
-      q.addSong(path);
+    $(".btn-file").click(function(e) {
+      $('#song-file-input').click();
     });
   </script>
 </html>

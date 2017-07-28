@@ -1,7 +1,7 @@
 html,
 main,
 body {
-  font-family:'Baloo Bhaina', cursive;
+  font-family: sans-serif;
   margin: 0;
   overflow: hidden;
   height: 100%;
@@ -10,42 +10,67 @@ body {
 main{
   width: 100%;
 }
-header{
+
+h1, h2, h3 {
+  font-family:'Fjalla One', sans-serif;
+}
+
+header {
   position:absolute;
   z-index: 3;
   width:100%;
   background-color: rgba(22,25,37,.5);
   overflow-y:hidden;
-  height: 60px;
+  height: 4.5em;
+  padding-bottom: .5em;
 }
-.title{
+
+.title-wrapper {
   float:left;
+  padding-left: 2em;
+  position: relative;
+  top: 100%;
+  transform: translateY(-100%);
+}
+
+.title-wrapper * {
   margin-top: 0px;
   margin-bottom: 0px;
-  padding-left: .5em;
+}
 
+.subtitle {
+  text-align: right;
+  font-style: italic;
 }
 .navbar {
     list-style-type: none;
     margin: 0;
     overflow: hidden;
     position: relative;
-    top: 50%;
-    transform: translateY(-50%);
-    height: 50%;
+    top: 100%;
+    transform: translateY(-100%);
+    clear: right;
 }
 .navbar li{
   float: right;
-
 }
 
-.navbar a{
+.navbar a {
+  cursor: pointer;
+  font-family:'Fjalla One', sans-serif;
+  font-size: 1.25em;
   text-decoration: none;
   color:#CBF7ED;
+  font-weight: bolder;
   display: block;
-  padding: 8px;
-  padding-right:12px;
+  padding: 1px;
+  padding-right:2em;
 }
+
+.navbar a:hover {
+  text-decoration: underline;
+}
+
 canvas{
   position: absolute;
   background-color: #23395B;
@@ -54,6 +79,10 @@ canvas{
 canvas[resize] {
   width: 100%;
   height: 100%;
+}
+
+.center {
+  text-align: center;
 }
 
 
@@ -108,7 +137,7 @@ button::-moz-focus-inner {
 #load-screen {
   background-color: rgba(22,25,37,.5);
   position: fixed;
-  z-index: 1000;
+  z-index: 4;
   width: 100%;
   height: 100%;
 }
@@ -128,7 +157,8 @@ button::-moz-focus-inner {
   bottom: 0;
   right: 0;
   width: 25%;
-  height: calc(100% - 60px - 2em);
+  height: calc(100% - 5em);
+  box-sizing: border-box;
   z-index: 1;
   background-color: rgba(22,25,37,.25);
   -webkit-transition: width 2s, height 2s; /* Safari */
@@ -141,7 +171,26 @@ button::-moz-focus-inner {
   border-bottom: 3px solid white;
 }
 
-#controls h3{
+.pop-out-wrapper{
+  /*display: none;*/
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(22,25,37,.3);
+}
+
+#song-add {
+  position: relative;
+  top: 50%;
+  left: 50%;
+  width: 30%;
+  transform: translate(-50%, -50%);
+  font-size: 2em;
+  padding: 1em 1em;
+  background-color: rgba(22,25,37,.8);
+}
+
+#controls h3 {
   margin-top: 0px;
 }
 
@@ -162,7 +211,7 @@ button::-moz-focus-inner {
   background-color: #23395B;
 }
 
-.btn i {
+.btn:not(.btn-file) i {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -174,6 +223,16 @@ button::-moz-focus-inner {
     border-radius: 50%;
     width: 25px;
     height: 25px;
+}
+
+.btn-file {
+  padding: 0.5em 0.5em;
+}
+
+.file-input {
+  width: 0px;
+  height: 0px;
+  overflow: hidden;
 }
 
 #play-pause {
