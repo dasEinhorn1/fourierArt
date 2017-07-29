@@ -15,7 +15,6 @@ const KEYS = {
   ESC : 27,
 }
 
-var mainS;
 var q;
 
 function timeToStringFormat(seconds, delimeters=[]) {
@@ -47,7 +46,8 @@ Song.prototype.load = function (callback) {
   function(){
     showErrorMessage("Error adding song");
   });
-  this.loader.setVolume(VOLUME)
+  this.loader.setVolume(VOLUME);
+  this.loader.playMode('restart');
 };
 
 Song.prototype.duration = function() {
@@ -79,7 +79,9 @@ PlayQueue.prototype.getCurrentSong = function() {
 };
 
 PlayQueue.prototype.now = function() {
-  return this.playlist[this.currentSongIndex].loader;
+  if (this.playlist[this.currentSongIndex]) {
+    return this.playlist[this.currentSongIndex].loader;
+  }
 };
 
 PlayQueue.prototype.time = function() {
@@ -88,7 +90,7 @@ PlayQueue.prototype.time = function() {
     total : 0,
     diff : 0
   };
-  if (!this.isPlaying()) {
+  if (!this.now()) {
     return timeObj;
   }
   timeObj.current = this.getCurrentSong().currentTime();
@@ -131,7 +133,6 @@ PlayQueue.prototype.play = function() {
     this.getCurrentSong().setOnEnded(function() {
       queue.next();
     });
-    $(".play")
   } else {
     setTimeout(this.play(), 500);
   }
@@ -182,11 +183,12 @@ PlayQueue.prototype.length= function() {
 
 PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
   var i = this.length();
-
+  startLoad();
   var s = new Song(path, i, name);
   var queue = this;
   s.load(function(){
     console.log("loaded");
+    endLoad();
     queue.playlist.push(s);
     queue.reloadSongListing();
     s.setOnEnded(function() {
@@ -219,6 +221,19 @@ PlayQueue.prototype.generateListItem = function(song) {
   return li;
 }
 
+PlayQueue.prototype.jumpTo = function (position) {
+  console.log(position);
+  this.getCurrentSong().setOnEnded(function(){});
+
+  this.now().jump(position);
+};
+
+PlayQueue.prototype.jumpAheadTen = function() {
+  if (this.now()) {
+    this.jumpTo(this.now().currentTime() + 10);
+  }
+}
+
 PlayQueue.prototype.toggleRepeat = function() {
   this.repeat = !this.repeat;
 }
@@ -233,12 +248,24 @@ PlayQueue.prototype.getSongIndex = function(id) {
 }
 
 PlayQueue.prototype.changePlaying = function(id) {
-  console.log('upplay');
   var songEl = $(this.ui).find('.song[data-id="' + id + '"]');
   if (songEl.length > 0) {
     console.log('changing');
     $(this.ui).find('.playing[data-playing="true"]').attr('data-playing', 'false')
-    songEl.find('.playing').attr('data-playing', 'true')
+    songEl.find('.playing').attr('data-playing', 'true');
+    var name = this.playlist[this.getSongIndex(id)].name;
+    $('.current-song').html(name);
+    $.each($('.current-song:not(.overflow-help)'), function(k, v) {
+      var el = $(v);
+      if (el.width() > el.parent().parent().width()){
+        console.log('too big');
+        el.parent().addClass('overflowing');
+        el.trigger('contentChanged', true);
+      } else {
+        el.trigger('contentChanged', false);
+        el.parent().removeClass('overflowing');
+      }
+    });
   }
 };
 
@@ -256,6 +283,15 @@ PlayQueue.prototype.reloadSongListing = function() {
   }
 }
 
+PlayQueue.prototype.updateProgressBars = function(timeObj) {
+  $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
+}
+
+PlayQueue.prototype.scrub = function(pc) {
+  $('.progress-bar').css('width', pc + '%');
+  var newCurrent = pc * q.now().duration() / 100;
+  q.jumpTo(newCurrent);
+}
 
 
 function preload(){

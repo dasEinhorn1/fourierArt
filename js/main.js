@@ -39,12 +39,10 @@ durationLoop.bringToFront();
 var previousTime = 0;
 durationLoop.onFrame = function(e) {
   var timeObj = q.time();
-  if (Math.round(previousTime) != Math.round(timeObj.current)) {
-
+  if (Math.round(previousTime) != Math.round(timeObj.current) && !scrubbing) {
     $('.time.time-current').html(timeToStringFormat(timeObj.current, TIME_FORMAT));
-    $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
+    q.updateProgressBars(timeObj);
     $('.time.time-left').html(timeToStringFormat(timeObj.diff, TIME_FORMAT));
-
   }
   previousTime = timeObj.current;
 }

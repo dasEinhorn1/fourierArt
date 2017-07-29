@@ -182,19 +182,10 @@ button::-moz-focus-inner {
 .submenu {
   padding: 1em 0em;
   min-height: 20%;
-  border-bottom: 3px solid white;
-}
-
-.pop-out-wrapper{
-  display: none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(22,25,37,.3);
 }
 
 #song-add {
-  position: relative;
+  position: fixed;
   top: 50%;
   left: 50%;
   width: 30%;
@@ -216,7 +207,7 @@ button::-moz-focus-inner {
 
 }
 
-#vis-menu .controls-wrap {
+.controls-wrap {
   position: relative;
 }
 
@@ -385,6 +376,7 @@ button::-moz-focus-inner {
 .time {
   flex: 1;
   text-align: center;
+  max-width: 4em;
 }
 .time-left::before {
   content: '-';
@@ -396,6 +388,7 @@ button::-moz-focus-inner {
   border-radius: 3px;
   box-sizing: border-box;
   flex: 3;
+  max-width: none;
   height: 10px
 }
 
@@ -405,4 +398,92 @@ button::-moz-focus-inner {
   border-radius: 3px;
   width : 0px;
   background-color: #CBF7ED;
+}
+
+.current-song-wrap {
+  overflow: hidden;
+  position: relative;
+}
+
+.current-song::before {
+  content: 'Now Playing: '
+}
+
+.current-song-text {
+  position: relative;
+  top:50%;
+  transform: translateY(-50%);
+  display: inline-block;
+  white-space: nowrap;
+}
+.current-song-text.overflowing {
+  /*animation-name: scroll-text;
+  animation-duration: 30s;
+  animation-timing-function: ease-in;*/
+  animation: scroll-text 30s ease-in 0s infinite
+}
+@keyframes scroll-text {
+  0%   {transform:translate(0, -50%);}
+  100%   {transform: translate(-100%, -50%);}
+}
+
+.current-song {
+  margin-right: 1em;
+}
+
+.current-song.overflow-help {
+  position: absolute;
+  float: left;
+  display: none;
+}
+
+.current-song.overflow-help.active {
+  display: inline;
+}
+
+.song-controls > div {
+  margin-bottom: 1.5em;
+  min-height: 40px;
+}
+
+.bottom-bar .current-song-wrap {
+  box-sizing: border-box;
+}
+
+.current-song-window {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.bottom-bar-wrap {
+  position: absolute;
+  width: 100%;
+  height:10vh;
+  transform: translateY(-100%);
+  left: 0;
+  top: 100%;
+}
+
+.bottom-bar {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(22,25,37,.25);
+  box-sizing: border-box;
+  padding-left: 2em;
+}
+
+.bottom-bar .controls {
+  transform: translate(-50%, -50%);
+}
+
+.bottom-bar > div {
+  flex: 1;
+}
+
+.bottom-bar > .time-bar-wrap {
+  flex: 3;
 }
