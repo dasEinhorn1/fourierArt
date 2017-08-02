@@ -190,10 +190,8 @@
     });
 
     $(window).on('keydown', function(e) {
-      console.log(e.which);
       if (e.which == KEYS.SPACE) {
-        var play = playButtonUpdate();
-        if (play) {
+        if (q.isPlaying()) {
           q.pause();
         } else {
           q.play();
@@ -253,8 +251,7 @@
     });
 
     $(".play-pause").click(function(e) {
-      var play = playButtonUpdate();
-      if (play) {
+      if (q.isPlaying()) {
         q.pause();
       } else {
         q.play();
@@ -285,7 +282,7 @@
     });
 
     var scrubbing = false;
-
+    var scrubbed = false;
     $('.progress-bar-wrap').on('mousedown', function(e) {
       if (q.now() == undefined) return;
       scrubbing = true;
@@ -304,7 +301,7 @@
       var pc = px / total * 100;
       $('.progress-bar').css('width', pc + '%');
     });
-    
+
     $('.progress-bar-wrap').on('mouseup', function(e) {
       scrubbing = false;
       if (q.now() == undefined) return;
@@ -313,11 +310,11 @@
       var px = e.pageX - offset.left;
       var total = $(e.currentTarget).innerWidth();
       var pc = px / total * 100;
-      console.log(q.scrub(pc));
+      q.scrub(pc);
+      scrubbed = true;
     });
 
     $('.current-song').on('contentChanged', function(e, isOverflowing) {
-      console.log(isOverflowing);
       if (isOverflowing) {
         $(this).parent().find('.overflow-help').addClass('active');
         var speed = $(this).outerWidth() * .03;

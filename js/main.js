@@ -20,6 +20,16 @@ Animator = function(){
   };
 }
 
+function sanityCheck() {
+  var loader = q.now();
+  if (loader) {
+    if (loader._playing == loader._paused) {
+      console.log("INSANITY");
+      loader._playing = !loader._paused;
+    }
+  }
+}
+
 anim = new Animator();
 
 function resizeDimensions(elem,width,height){
@@ -58,7 +68,7 @@ for(var i = 0; i < 16; i++){ // i(totalwidth/32)+totalwidth/16
   fftCircles.addChild(tempG);
 
 }
-var resetFftCircles = function(anim){
+var resetFftCircles = function(anim) {
   for(var i=0; i<fftCircles.children.length;i++){
     var cG=fftCircles.children[i];
     for(var j=0;j<2;j++){
@@ -69,7 +79,7 @@ var resetFftCircles = function(anim){
 var waveFormCrv=new Path();
 waveFormCrv.strokeColor='black';
 waveFormCrv.strokeWidth= 5;
-for(var i=0; i<256; i++){
+for (var i=0; i<256; i++) {
   waveFormCrv.add(new Point(i*(dimensions.w/255),0));
 }
 
@@ -121,7 +131,8 @@ gradientBg.onFrame = function(event){
 // the directions of the circles
 var dirs=[1,-1];
 var gravity = 5;
-fftCircles.onFrame = function(event){
+fftCircles.onFrame = function(event) {
+  sanityCheck();
   if(anim.paused) return;
   var currentAvgs = getSubdividedAvg(trimZeroes(fft.analyze()));//get averages
   for (var i in fftCircles.children) {
@@ -147,7 +158,7 @@ fftCircles.onFrame = function(event){
   }
   fftCircles.bringToFront();
   fftCircles.position=new Point(waveFormCrv.bounds.width/2,dimensions.h/2)
-  if(!q.isPlaying()){
+  if(!q.isPlaying()) {
     anim.reset();
   }
 }

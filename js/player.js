@@ -1,5 +1,5 @@
 const DEFAULT_SONG = "media/sound/Death_Grips_-_Guillotine_(It_goes_Yah).mp3";
-const VOLUME = .1;
+const VOLUME = 1;
 const TIME_FORMAT = [':', ':','']
 
 const KEYS = {
@@ -100,11 +100,14 @@ PlayQueue.prototype.time = function() {
 };
 
 PlayQueue.prototype.isPlaying = function() {
-  if (this.playlist[this.currentSongIndex] == undefined)
+  if (this.playlist[this.currentSongIndex] == undefined) {
+    console.log('song is undefined');
     return false;
-  if (this.playlist[this.currentSongIndex].loader == undefined)
+  }
+  if (this.playlist[this.currentSongIndex].loader == undefined) {
+    console.log('song loader is undefined');
     return false;
-
+  }
   return this.now().isPlaying();
 }
 PlayQueue.prototype.changeSong = function(id, callback) {
@@ -123,61 +126,85 @@ PlayQueue.prototype.changeSong = function(id, callback) {
   }
   callback();
 }
-PlayQueue.prototype.play = function() {
-  if (this.now().isLoaded()) {
-    playButtonUpdate();
-    this.changePlaying(this.getCurrentSong().id);
-    anim.play();
+PlayQueue.prototype.play = function(startAt) {
+  if (!this.now().isLoaded()) return;
+  console.log('PLAY');
+  this.changePlaying(this.getCurrentSong().id);
+  // anim.pause();
+  playButtonUpdate(true);
+  if (startAt === undefined) {
     this.now().play();
-    var queue = this;
-    this.getCurrentSong().setOnEnded(function() {
-      queue.next();
-    });
+    console.log(this.now().isPlaying());
   } else {
-    setTimeout(this.play(), 500);
+    console.log('start with time: ' + startAt);
+    this.now().play(0, 1, VOLUME, startAt);
   }
+  anim.play();
 }
 
 PlayQueue.prototype.pause = function() {
-  this.getCurrentSong().setOnEnded(function(){});
-  playButtonUpdate();
+  playButtonUpdate(false);
   this.now().pause();
   anim.pause();
 }
 
-PlayQueue.prototype.stop = function() {
-  playButtonUpdate();
+PlayQueue.prototype.stop = function(callback) {
+  if (callback === undefined) {
+    callback = function(){};
+  }
+  playButtonUpdate(false);
   this.now().stop();
   anim.pause();
   anim.reset();
+  callback();
 }
 
 PlayQueue.prototype.next = function () {
   console.log(this.currentSongIndex);
-  if (this.currentSongIndex + 1 == this.length() && !this.repeat) {
+  if (this.currentSongIndex + 1 === this.length() && !this.repeat) {
     return;
   }
-  this.getCurrentSong().setOnEnded(function(){});
-  this.stop();
-  this.currentSongIndex++;
-  if (this.currentSongIndex == this.length() && this.repeat) {
-    this.currentSongIndex = 0;
-  }
-  this.play();
+  var queue = this;
+  this.stop(function(){
+    queue.currentSongIndex++;
+    if (queue.currentSongIndex === queue.length() && queue.repeat) {
+      queue.currentSongIndex = 0;
+    }
+    queue.play();
+  });
 };
 
 PlayQueue.prototype.previous = function () {
-  this.getCurrentSong().setOnEnded(function(){});
-  this.stop();
-  this.currentSongIndex--;
-  console.log(this.currentSongIndex);
-  if (this.currentSongIndex < 0) {
-    this.currentSongIndex = 0;
+  var queue = this;
+  if (this.currentSongIndex - 1 < 0) {
+    this.stop();
+    this.play();
+    return;
   }
-  this.play();
+  this.stop(function(){
+    queue.currentSongIndex--;
+    console.log(queue.currentSongIndex);
+    if (queue.currentSongIndex < 0) {
+      queue.currentSongIndex = 0;
+    }
+    queue.play();
+  });
 };
 
-PlayQueue.prototype.length= function() {
+PlayQueue.prototype.songEnded = function() {
+  var c = this.now().currentTime();
+  var d = this.now().duration();
+  console.log(c,d);
+  if (d - c < .05) {
+    console.log('Song Ended. Moving on.');
+    this.next();
+  } else {
+    console.log('Song Ended?');
+    return;
+  }
+}
+
+PlayQueue.prototype.length  = function() {
   return this.playlist.length;
 }
 
@@ -192,7 +219,7 @@ PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
     queue.playlist.push(s);
     queue.reloadSongListing();
     s.setOnEnded(function() {
-      queue.next();
+      queue.songEnded();
     });
     if (i == 0) {
       queue.currentSongIndex = i
@@ -223,9 +250,10 @@ PlayQueue.prototype.generateListItem = function(song) {
 
 PlayQueue.prototype.jumpTo = function (position) {
   console.log(position);
-  this.getCurrentSong().setOnEnded(function(){});
-
-  this.now().jump(position);
+  var queue = this;
+  this.stop(function() {
+    queue.play(position);
+  });
 };
 
 PlayQueue.prototype.jumpAheadTen = function() {
@@ -287,10 +315,11 @@ PlayQueue.prototype.updateProgressBars = function(timeObj) {
   $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
 }
 
-PlayQueue.prototype.scrub = function(pc) {
+PlayQueue.prototype.scrub = function(pc, callback=function(){}) {
   $('.progress-bar').css('width', pc + '%');
   var newCurrent = pc * q.now().duration() / 100;
-  q.jumpTo(newCurrent);
+  this.jumpTo(newCurrent);
+  callback();
 }
 
 
@@ -321,17 +350,15 @@ var endLoad = function() {
 	$("#load-screen").css('display', 'none');
 }
 
-var playButtonUpdate = function() {
+var playButtonUpdate = function(playing) {
   var play = $('.fa-play');
   var pause = $('.fa-pause');
-  if (q.isPlaying()) {
-    pause.css('display', 'none');
-    play.css('display', 'inline-block');
-    return true;
-  } else {
+  if (playing) {
     play.css('display', 'none');
     pause.css('display', 'inline-block');
-    return false;
+  } else {
+    pause.css('display', 'none');
+    play.css('display', 'inline-block');
   }
 }
 
