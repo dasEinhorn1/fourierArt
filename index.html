@@ -20,7 +20,7 @@
       <ol class="navbar">
         <li><a href="docs.html">Docs</a></li>
         <li><a href="about.html">About</a></li>
-        <li><a href="index.html">Visualizer</a></li>
+        <li><a class='active' href="index.html">Visualizer</a></li>
       </ol>
     </header>
     <main>
@@ -247,6 +247,10 @@
         default:
           return;
       }
+    });
+
+    $('a.active').click(function(e) {
+      e.preventDefault();
     });
 
     $(".btn-file").click(function(e) {

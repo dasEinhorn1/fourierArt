@@ -83,6 +83,14 @@ header {
   text-decoration: underline;
 }
 
+.navbar a.active {
+  text-decoration: underline;
+}
+
+.navbar a.active:hover {
+  text-decoration: line-through;
+}
+
 canvas{
   position: absolute;
   background-color: #23395B;

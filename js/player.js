@@ -42,13 +42,18 @@ var Song = function(path, id, name=undefined) {
 }
 Song.prototype.load = function (callback) {
   this.loader = loadSound(this.path, function() {
-    callback();
+    return callback();
   },
   function(){
     showErrorMessage("Error adding song");
+    return;
   });
-  this.loader.setVolume(VOLUME);
-  this.loader.playMode('restart');
+  if (this.loader) {
+    this.loader.setVolume(VOLUME);
+    this.loader.playMode('restart');
+    return true;
+  }
+  return false;
 };
 
 Song.prototype.duration = function() {
@@ -200,7 +205,7 @@ PlayQueue.prototype.songEnded = function() {
     console.log('Song Ended. Moving on.');
     this.next();
   } else {
-    console.log('Song Ended?');
+    console.log('Song probably hasn\'t ended.' + (d - c));
     return;
   }
 }
