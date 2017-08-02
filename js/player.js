@@ -3,16 +3,17 @@ const VOLUME = 1;
 const TIME_FORMAT = [':', ':','']
 
 const KEYS = {
-  UP : 38,
-  DOWN : 40,
-  LEFT : 37,
-  RIGHT : 39,
+  ESC : 27,
   SPACE : 32,
+  LEFT : 37,
+  UP : 38,
+  RIGHT : 39,
+  DOWN : 40,
   ENTER : 36,
+  A : 65,
   Q : 81,
   R : 82,
-  A : 65,
-  ESC : 27,
+  T : 84
 }
 
 var q;

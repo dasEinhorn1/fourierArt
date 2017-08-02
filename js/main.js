@@ -24,7 +24,7 @@ function sanityCheck() {
   var loader = q.now();
   if (loader) {
     if (loader._playing == loader._paused) {
-      console.log("INSANITY");
+      console.log("INSANITY!");
       loader._playing = !loader._paused;
     }
   }

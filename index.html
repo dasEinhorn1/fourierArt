@@ -26,6 +26,7 @@
     <main>
       <div id='load-screen' style='display:none;'>
         <img src="media/Infinity.svg" alt="loading"/>
+        <p class='load-progress'>0/0</p>
       </div>
 
       <!-- <div id='q-menu-popup' class='btn'>Show controls</div> -->
@@ -68,8 +69,10 @@
         <div class = 'song-controls submenu'>
           <div class="current-song-wrap">
             <div class="current-song-window">
-              <div class="current-song"></div>
-              <div class="current-song overflow-help"></div>
+              <div class="current-song-text">
+                <span class='current-song'></span>
+                <span class="current-song overflow-help"></span>
+              </div>
             </div>
           </div>
           <div class="time-bar-wrap">
@@ -158,7 +161,7 @@
           <i class='fa fa-upload'></i>
         </label>
         <input id="song-file-input" class='file-input'
-          type="file" name="sound-file" multiple='false'/>
+          type="file" name="sound-file" multiple='true'/>
       </div>
       <p>&mdash; or &mdash;</p>
       <div class='sound-link-wrap'>
@@ -182,43 +185,67 @@
     <script type="text/paperscript" src="js/main.js" canvas="visualizer"></script>
   </body>
   <script type="text/javascript">
-    $('#song-file-input').change( function(event) {
-      $.each(event.target.files, function(k,v) {
-        var tmppath = URL.createObjectURL(v);
-        q.addSong(tmppath, function(){}, v.name);
-      });
+    var loadFiles = function(i, files) {
+      $('.load-progress').html('Loading: ' + (i + 1) + '/' + files.length);
+      if (i >= files.length) return;
+      var f = files[i],
+          path = URL.createObjectURL(f);
+      q.addSong(path, function(){
+        loadFiles(i + 1, files);
+      }, f.name);
+    }
+
+    $('#song-file-input').change(function(event) {
+      $('.load-progress').html('');
+      var i = 0;
+          files = event.target.files;
+      loadFiles(i, files);
     });
 
     $(window).on('keydown', function(e) {
-      if (e.which == KEYS.SPACE) {
-        if (q.isPlaying()) {
-          q.pause();
-        } else {
-          q.play();
-        }
-      } else if (e.which == KEYS.LEFT) {
-        q.previous();
-      } else if (e.which == KEYS.RIGHT) {
-        q.next();
-      } else if (e.which == KEYS.Q) {
-        if ($('#vis-menu').css('display') == 'none') {
-          $('#vis-menu').css('display', 'block');
-          $('.bottom-bar-wrap').css('display','none');
-        } else {
-          $('#vis-menu').css('display','none');
-          $('.bottom-bar-wrap').css('display', 'block');
-        }
-      } else if (e.which == KEYS.R) {
-        $('.repeat').toggleClass('selected');
-        q.toggleRepeat();
-      } else if (e.which == KEYS.A) {
-        if ($('#song-add').css('display') == 'none') {
-          $('#song-add').css('display', 'block');
-        } else {
-          $('#song-add').css('display', 'none');
-        }
-      } else if (e.which == KEYS.ESC) {
-        $('.close-btn:not(.default)').click();
+      var keycode = e.which;
+      switch (e.which) {
+        case KEYS.SPACE:
+          if (q.isPlaying()) {
+            q.pause();
+          } else {
+            q.play();
+          }
+          break;
+        case KEYS.LEFT:
+          q.previous();
+          break;
+        case KEYS.RIGHT:
+          q.next();
+          break;
+        case KEYS.Q:
+          if ($('#vis-menu').css('display') == 'none') {
+            $('#vis-menu').css('display', 'block');
+            $('.bottom-bar-wrap').css('display','none');
+          } else {
+            $('#vis-menu').css('display','none');
+            $('.bottom-bar-wrap').css('display', 'block');
+          }
+          break;
+        case KEYS.R:
+          $('.repeat').toggleClass('selected');
+          q.toggleRepeat();
+          break;
+        case KEYS.T:
+          $('#song-file-input').click();
+          break;
+        case KEYS.A:
+          if ($('#song-add').css('display') == 'none') {
+            $('#song-add').css('display', 'block');
+          } else {
+            $('#song-add').css('display', 'none');
+          }
+          break;
+        case KEYS.ESC:
+          $('.close-btn:not(.default)').click();
+          break;
+        default:
+          return;
       }
     });
 

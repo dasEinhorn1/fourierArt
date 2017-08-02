@@ -36,6 +36,9 @@ header {
   padding-left: 2em;
   position: relative;
   top: 100%;
+  -webkit-transform: translateY(-100%);
+  -moz-transform: translateY(-100%);
+  -o-transform: translateY(-100%);
   transform: translateY(-100%);
 }
 
@@ -54,8 +57,11 @@ header {
     overflow: hidden;
     position: relative;
     top: 100%;
-    transform: translateY(-100%);
     clear: right;
+    -webkit-transform: translateY(-100%);
+    -moz-transform: translateY(-100%);
+    -o-transform: translateY(-100%);
+    transform: translateY(-100%);
 }
 .navbar li{
   float: right;
@@ -148,20 +154,39 @@ button::-moz-focus-inner {
   height: 100%;
 }
 
-#load-screen img {
+#load-screen * {
   display: block;
   margin-left: auto;
   margin-right: auto;
-  position: relative;
+  position: absolute;
   top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  text-align: center;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
+
+#load-screen p {
+  margin: 0;
+  color: black;
+  font-size: 2em;
+  padding: 5px 5px;
+  border-radius: 10px;
+  top: 60%;
+  background-color: rgba(255,255,255,.75);
+}
+
 
 #q-menu-popup {
   z-index:3;
   position: fixed;
   top: 100%;
   left: 100%;
+  -webkit-transform: translate(-150%,-150%);
+  -moz-transform: translate(-150%,-150%);
+  -o-transform: translate(-150%,-150%);
   transform: translate(-150%,-150%);
 }
 
@@ -189,11 +214,14 @@ button::-moz-focus-inner {
   top: 50%;
   left: 50%;
   width: 30%;
-  transform: translate(-50%, -50%);
   font-size: 2em;
   padding: 1em 1em;
   background-color: rgba(22,25,37,.8);
   overflow: hidden;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 #song-add .close-wrap {
@@ -203,8 +231,10 @@ button::-moz-focus-inner {
 #song-add .close-btn {
   top: 0;
   left: 100%;
+  -webkit-transform: translate(-50%);
+  -moz-transform: translate(-50%);
+  -o-transform: translate(-50%);
   transform: translate(-50%);
-
 }
 
 .controls-wrap {
@@ -217,6 +247,9 @@ button::-moz-focus-inner {
   display: inline-block;
   left: 50%;
   top: 50%;
+  -webkit-transform: translate(-50%);
+  -moz-transform: translate(-50%);
+  -o-transform: translate(-50%);
   transform: translate(-50%);
 }
 
@@ -244,8 +277,11 @@ button::-moz-focus-inner {
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   display: inline-block;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 .btn.circle {
@@ -320,6 +356,9 @@ button::-moz-focus-inner {
 
 .controls .btn:not(.play-pause) {
   top: 50%;
+  -webkit-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
   transform: translateY(-50%);
 }
 
@@ -412,19 +451,35 @@ button::-moz-focus-inner {
 .current-song-text {
   position: relative;
   top:50%;
-  transform: translateY(-50%);
   display: inline-block;
   white-space: nowrap;
+  -webkit-transform: translateY(-50%);
+  -moz-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 .current-song-text.overflowing {
   /*animation-name: scroll-text;
   animation-duration: 30s;
   animation-timing-function: ease-in;*/
-  animation: scroll-text 30s ease-in 0s infinite
+  -webkit-animation: scroll-text 30s ease-in 0s infinite;
+  -moz-animation: scroll-text 30s ease-in 0s infinite;
+  -o-animation: scroll-text 30s ease-in 0s infinite;
+  animation: scroll-text 30s ease-in 0s infinite;
 }
 @keyframes scroll-text {
-  0%   {transform:translate(0, -50%);}
-  100%   {transform: translate(-100%, -50%);}
+  0%   {
+    -webkit-transform:translate(0, -50%);
+    -moz-transform:translate(0, -50%);
+    -o-transform:translate(0, -50%);
+    transform:translate(0, -50%);
+  }
+  100%   {
+    -webkit-transform: translate(-100%, -50%);
+    -moz-transform: translate(-100%, -50%);
+    -o-transform: translate(-100%, -50%);
+    transform: translate(-100%, -50%);
+  }
 }
 
 .current-song {
@@ -443,7 +498,11 @@ button::-moz-focus-inner {
 
 .song-controls > div {
   margin-bottom: 1.5em;
-  min-height: 40px;
+  min-height: 30px;
+}
+
+.song-controls .current-song-wrap {
+  height: 40px;
 }
 
 .bottom-bar .current-song-wrap {
@@ -462,9 +521,12 @@ button::-moz-focus-inner {
   position: absolute;
   width: 100%;
   height:10vh;
-  transform: translateY(-100%);
   left: 0;
   top: 100%;
+  -webkit-transform: translateY(-100%);
+  -moz-transform: translateY(-100%);
+  -o-transform: translateY(-100%);
+  transform: translateY(-100%);
 }
 
 .bottom-bar {
@@ -477,6 +539,9 @@ button::-moz-focus-inner {
 }
 
 .bottom-bar .controls {
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
 }
 
