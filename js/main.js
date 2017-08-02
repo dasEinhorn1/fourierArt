@@ -76,9 +76,9 @@ var resetFftCircles = function(anim) {
     }
   }
 }
-var waveFormCrv=new Path();
-waveFormCrv.strokeColor='black';
-waveFormCrv.strokeWidth= 5;
+var waveFormCrv = new Path();
+waveFormCrv.strokeColor = 'black';
+waveFormCrv.strokeWidth = 5;
 for (var i=0; i<256; i++) {
   waveFormCrv.add(new Point(i*(dimensions.w/255),0));
 }
@@ -98,7 +98,7 @@ var gradientBg = new Path.Rectangle({
     // that runs between the two points we defined earlier:
 gradientBg.fillColor= {
   gradient: {
-    stops: ['red', 'red','blue'],
+    stops: ['blue', 'blue','blue'],
     radial:true
   },
   origin:gradientBg.position,
@@ -112,18 +112,22 @@ waveFormCrv.smooth({ type: 'catmull-rom', factor: 0.8 });
 var bright=0;
 gradientBg.onFrame = function(event){
   if(anim.paused) return;
-  if(event.count%1==0){
+  if(event.count % 1 == 0){
     var currentSpec=fft.analyze();
-    if (bright>0){
-      bright-=.02;
+    peaking = detectPeak();
+    if(peaking){
+      console.log('pk');
+      bright = 1;
+    } else {
+      bright *= .99;
     }
-    if(detectPeak()){
-      bright=1;
-    }
-    var newHue=[ getColorFromAmplitude(256,0,0,25),getColorFromAmplitude(122,0,0,15),getColorFromAmplitude(0,0,0,15)];
+    var c1 = getColorFromAmplitude(255,1,0,50),
+        c2 = getColorFromAmplitude(255,1,50,150),
+        c3 = getColorFromAmplitude(255,1,150,255);
+    var newHue=[c1, c2, c3];
     var colour= this.fillColor;
     for(clr in colour.gradient.stops){
-      colour.gradient.stops[clr].color.hue=newHue[clr];
+      colour.gradient.stops[clr].color.hue=newHue[clr] * 60 + 180;
       colour.gradient.stops[clr].color.brightness=bright;
     }
   }

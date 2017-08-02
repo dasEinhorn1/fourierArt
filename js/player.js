@@ -75,18 +75,19 @@ Song.prototype.setOnEnded = function(callback) {
 var PlayQueue = function(target) {
   this.ui = target;
   this.playlist = [];
-  this.currentSongIndex = 0;
+  this.current = 0;
+  this.last = 0;
   this.repeat = false;
   this.changing = false;
 };
 
 PlayQueue.prototype.getCurrentSong = function() {
-  return this.playlist[this.currentSongIndex];
+  return this.playlist[this.current];
 };
 
 PlayQueue.prototype.now = function() {
-  if (this.playlist[this.currentSongIndex]) {
-    return this.playlist[this.currentSongIndex].loader;
+  if (this.playlist[this.current]) {
+    return this.playlist[this.current].loader;
   }
 };
 
@@ -106,11 +107,11 @@ PlayQueue.prototype.time = function() {
 };
 
 PlayQueue.prototype.isPlaying = function() {
-  if (this.playlist[this.currentSongIndex] == undefined) {
+  if (this.playlist[this.current] == undefined) {
     console.log('song is undefined');
     return false;
   }
-  if (this.playlist[this.currentSongIndex].loader == undefined) {
+  if (this.playlist[this.current].loader == undefined) {
     console.log('song loader is undefined');
     return false;
   }
@@ -123,9 +124,10 @@ PlayQueue.prototype.changeSong = function(id, callback) {
   this.changing = true;
   if (id != undefined) {
     var i = this.getSongIndex(id);
-    if (i != -1 && i != this.currentSongIndex) {
+    if (i != -1 && i != this.current) {
       this.stop();
-      this.currentSongIndex = i;
+      this.last = this.current;
+      this.current = i;
       this.stop();
       this.play();
     }
@@ -166,15 +168,16 @@ PlayQueue.prototype.stop = function(callback) {
 }
 
 PlayQueue.prototype.next = function () {
-  console.log(this.currentSongIndex);
-  if (this.currentSongIndex + 1 === this.length() && !this.repeat) {
+  console.log(this.current);
+  if (this.current + 1 === this.length() && !this.repeat) {
     return;
   }
   var queue = this;
   this.stop(function(){
-    queue.currentSongIndex++;
-    if (queue.currentSongIndex === queue.length() && queue.repeat) {
-      queue.currentSongIndex = 0;
+    this.last = queue.current;
+    queue.current++;
+    if (queue.current === queue.length() && queue.repeat) {
+      queue.current = 0;
     }
     queue.play();
   });
@@ -182,20 +185,43 @@ PlayQueue.prototype.next = function () {
 
 PlayQueue.prototype.previous = function () {
   var queue = this;
-  if (this.currentSongIndex - 1 < 0) {
+  this.last = this.current;
+  if (this.current - 1 < 0) {
     this.stop();
     this.play();
     return;
   }
   this.stop(function(){
-    queue.currentSongIndex--;
-    console.log(queue.currentSongIndex);
-    if (queue.currentSongIndex < 0) {
-      queue.currentSongIndex = 0;
+    queue.current--;
+    console.log(queue.current);
+    if (queue.current < 0) {
+      queue.current = 0;
     }
     queue.play();
   });
 };
+
+PlayQueue.prototype.last = function() {
+  return this.last;
+};
+
+PlayQueue.prototype.totalDuration = function() {
+  var l = this.playlist.length;
+  var totalDur = 0;
+  for (var i = 0; i < this.playlist.length; i++){
+    var s = this.playlist[i];
+    totalDur += s.duration();
+  }
+  return totalDur;
+}
+
+PlayQueue.prototype.durationAsString = function () {
+  return timeToStringFormat(this.totalDuration());
+};
+
+PlayQueue.prototype.shuffle = function() {
+  return;
+}
 
 PlayQueue.prototype.songEnded = function() {
   var c = this.now().currentTime();
@@ -204,6 +230,9 @@ PlayQueue.prototype.songEnded = function() {
   if (d - c < .05) {
     console.log('Song Ended. Moving on.');
     this.next();
+  } else if (c === 0) {
+    console.log('Song may have restarted');
+    console.log(this.last, this.current);
   } else {
     console.log('Song probably hasn\'t ended.' + (d - c));
     return;
@@ -228,7 +257,7 @@ PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
       queue.songEnded();
     });
     if (i == 0) {
-      queue.currentSongIndex = i
+      queue.current = i
       queue.play();
     }
     if(cb) {

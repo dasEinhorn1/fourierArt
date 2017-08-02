@@ -11,7 +11,7 @@ lastIncrEvent = 0;
 increaseEventBuffer = 20; //minimum of number of frames that must pass between each 'increase' event
 
 fft = new p5.FFT(0.8,fftBins);
-peakDetect = new p5.PeakDetect(0, 7000, 0.23);
+peakDetect = new p5.PeakDetect(250, 500, .5, 20);
 
 //returns a hue (0-360) based on the frequency closest to chosen amplitude
 //accepts a buffer range (for smoothing) and a start and end point
@@ -42,7 +42,7 @@ function getColorFromAmplitude(amplitude, buffer=0, start=0, end=fftBins - 1)
 			var proximity = freqProximity;
 		}
 	}
-	var hueValue = (freq/(end-start)*60) + 180;
+	var hueValue = freq / (end-start);
 	return hueValue;
 }
 
@@ -154,14 +154,7 @@ function detectPeak()
 {
 	fft.analyze();
 	peakDetect.update(fft);
-	if(peakDetect.isDetected)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+	return peakDetect.isDetected;
 }
 
 // trim 'zero tail' off of the end of the fourier transform array
