@@ -19,11 +19,11 @@ const KEYS = {
 var q;
 
 function timeToStringFormat(seconds, delimeters=[]) {
-  var hours = Math.floor(seconds / 3600);
+  let hours = Math.floor(seconds / 3600);
   seconds = seconds % 3600;
-  var minutes = Math.floor(seconds / 60);
+  let minutes = Math.floor(seconds / 60);
   seconds = Math.round(seconds % 60);
-  var str = '';
+  let str = '';
   if (hours > 0) {
     str += hours + (delimeters[0] || 'h ');
   }
@@ -34,43 +34,38 @@ function timeToStringFormat(seconds, delimeters=[]) {
   return str;
 }
 
-var Song = function(path, id, name=undefined) {
-  this.path = path;
-  this.name = name || path.split("/").pop();
-  this.id = id;
-  this.loader = undefined;
-}
-Song.prototype.load = function (callback) {
-  this.loader = loadSound(this.path, function() {
-    return callback();
-  },
-  function(){
-    showErrorMessage("Error adding song");
-    return;
-  });
-  if (this.loader) {
-    this.loader.setVolume(VOLUME);
-    this.loader.playMode('restart');
-    return true;
+class Song {
+  constructor(path, id, name=undefined) {
+    this.path = path;
+    this.name = name || path.split("/").pop();
+    this.id = id;
+    this.loader = undefined;
   }
-  return false;
-};
 
-Song.prototype.duration = function() {
-  return this.loader.duration();
+  load(callback) {
+    this.loader = loadSound(this.path,
+      () => { return callback();},
+      () => showErrorMessage("Error adding song"));
+    if (this.loader) {
+      this.loader.setVolume(VOLUME);
+      this.loader.playMode('restart');
+      return true;
+    }
+    return false;
+  }
+  duration() {
+    return this.loader.duration();
+  }
+  currentTime() {
+    return this.loader.currentTime();
+  }
+  getDurationString() {
+    return timeToStringFormat(this.duration());
+  }
+  setOnEnded(callback) {
+    this.loader.onended(callback);
+  }
 }
-
-Song.prototype.currentTime = function() {
-  return this.loader.currentTime();
-}
-
-Song.prototype.getDurationString = function () {
-  return timeToStringFormat(this.duration());
-};
-
-Song.prototype.setOnEnded = function(callback) {
-  this.loader.onended(callback);
-};
 
 var PlayQueue = function(target) {
   this.ui = target;
@@ -123,7 +118,7 @@ PlayQueue.prototype.changeSong = function(id, callback) {
   }
   this.changing = true;
   if (id != undefined) {
-    var i = this.getSongIndex(id);
+    let i = this.getSongIndex(id);
     if (i != -1 && i != this.current) {
       this.stop();
       this.last = this.current;
@@ -208,7 +203,7 @@ PlayQueue.prototype.last = function() {
 PlayQueue.prototype.totalDuration = function() {
   var l = this.playlist.length;
   var totalDur = 0;
-  for (var i = 0; i < this.playlist.length; i++){
+  for (let i = 0; i < this.playlist.length; i++){
     var s = this.playlist[i];
     totalDur += s.duration();
   }
@@ -227,7 +222,7 @@ PlayQueue.prototype.songEnded = function() {
   var c = this.now().currentTime();
   var d = this.now().duration();
   console.log(c,d);
-  if (d - c < .05) {
+  if (Math.abs(d - c) < .05) {
     console.log('Song Ended. Moving on.');
     this.next();
   } else if (c === 0) {
@@ -244,7 +239,7 @@ PlayQueue.prototype.length  = function() {
 }
 
 PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
-  var i = this.length();
+  let i = this.length();
   startLoad();
   var s = new Song(path, i, name);
   var queue = this;
@@ -285,9 +280,8 @@ PlayQueue.prototype.generateListItem = function(song) {
 
 PlayQueue.prototype.jumpTo = function (position) {
   console.log(position);
-  var queue = this;
-  this.stop(function() {
-    queue.play(position);
+  this.stop(() => {
+    this.play(position);
   });
 };
 
@@ -302,7 +296,7 @@ PlayQueue.prototype.toggleRepeat = function() {
 }
 
 PlayQueue.prototype.getSongIndex = function(id) {
-  for (var i = 0; i < this.length(); i++) {
+  for (let i = 0; i < this.length(); i++) {
     if (this.playlist[i].id == id) {
       return i;
     }
@@ -335,7 +329,7 @@ PlayQueue.prototype.changePlaying = function(id) {
 PlayQueue.prototype.reloadSongListing = function() {
   console.log("update");
   if (this.length() > $(this.ui).find('li').length){
-    for (var i = 0; i < this.length(); i++) {
+    for (let i = 0; i < this.length(); i++) {
       var s = this.playlist[i];
       var sEl = $(this.ui).find('.song[data-id="' + s.id + '"]')
       if (sEl.length == 0){

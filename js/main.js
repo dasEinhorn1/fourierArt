@@ -126,7 +126,7 @@ gradientBg.onFrame = function(event){
         c3 = getColorFromAmplitude(255,1,150,255);
     var newHue=[c1, c2, c3];
     var colour= this.fillColor;
-    for(clr in colour.gradient.stops){
+    for (clr in colour.gradient.stops) {
       colour.gradient.stops[clr].color.hue=newHue[clr] * 60 + 180;
       colour.gradient.stops[clr].color.brightness=bright;
     }
