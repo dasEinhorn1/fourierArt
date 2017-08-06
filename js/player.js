@@ -1,7 +1,16 @@
-const DEFAULT_SONG = "media/sound/Death_Grips_-_Guillotine_(It_goes_Yah).mp3";
+/*
+ * Author: Adam Hayward
+ * Version: 1.1
+ * This file holds the song and playlist related components of the project
+ * (logic and some ui)
+*/
+
+// volume of all songs to be played
 const VOLUME = 1;
+// how time should be formatted in timeToStringFormat
 const TIME_FORMAT = [':', ':','']
 
+// Keycodes
 const KEYS = {
   ESC : 27,
   SPACE : 32,
@@ -16,6 +25,7 @@ const KEYS = {
   T : 84
 }
 
+// the queue for later initialization
 var q;
 
 function timeToStringFormat(seconds, delimeters=[]) {
@@ -34,333 +44,385 @@ function timeToStringFormat(seconds, delimeters=[]) {
   return str;
 }
 
+/*
+ * Song holds all song-related metadata, as well as a p5 SoundFile
+ * https://p5js.org/reference/#/p5.SoundFile for details on that
+ */
 class Song {
-  constructor(path, id, name=undefined) {
-    this.path = path;
-    this.name = name || path.split("/").pop();
-    this.id = id;
-    this.loader = undefined;
+  constructor(path, id, name = undefined) {
+    this._path = path;
+    this._name = name || path.split("/").pop();
+    this._id = id;
+    this._loader = undefined;
   }
 
+  set name    (name)    { this._name = name; }
+  get name    ()        { return this._name; }
+  set loader  (loader)  { this._loader = loader; }
+  get loader  ()        { return this._loader; }
+  get id      ()        { return this._id; }
+  set id      (id)      { this._id = id; }
+
   load(callback) {
-    this.loader = loadSound(this.path,
+    this._loader = loadSound(this._path,
       () => { return callback();},
       () => showErrorMessage("Error adding song"));
-    if (this.loader) {
-      this.loader.setVolume(VOLUME);
-      this.loader.playMode('restart');
+    if (this._loader) {
+      this._loader.setVolume(VOLUME);
+      this._loader.playMode('restart');
       return true;
     }
     return false;
   }
+
+  /* Get the duration of a song in seconds*/
   duration() {
-    return this.loader.duration();
+    return this._loader.duration();
   }
+
+  /* Get the current position in seconds in the song */
   currentTime() {
-    return this.loader.currentTime();
+    return this._loader.currentTime();
   }
+
+  /* Nicely format the duration as a string */
   getDurationString() {
     return timeToStringFormat(this.duration());
   }
+
+  /* Set what happens once the song finishes */
   setOnEnded(callback) {
-    this.loader.onended(callback);
+    this._loader.onended(callback);
   }
 }
 
-var PlayQueue = function(target) {
-  this.ui = target;
-  this.playlist = [];
-  this.current = 0;
-  this.last = 0;
-  this.repeat = false;
-  this.changing = false;
-};
+/*
+ * PlayQueue holds an array of songs and manages playing them sequentially
+ * It also acts as a control of sorts for the ui controls/ updates.
+ * TODO: Move UI related functions to a UI Manager object or just global
+ *  functions
+ */
+class PlayQueue {
 
-PlayQueue.prototype.getCurrentSong = function() {
-  return this.playlist[this.current];
-};
-
-PlayQueue.prototype.now = function() {
-  if (this.playlist[this.current]) {
-    return this.playlist[this.current].loader;
+  constructor(target) {
+    this._ui = target; // the selecto of the playlist table element
+    this._playlist = [];
+    this._current = 0;
+    this._last = 0;
+    this._repeat = false;
+    this._changing = false;
   }
-};
 
-PlayQueue.prototype.time = function() {
-  var timeObj = {
-    current : 0,
-    total : 0,
-    diff : 0
-  };
-  if (!this.now()) {
+  get ui        ()         { return this._ui; }
+  set ui        (ui)       { this._ui = ui;   }
+  get playlist  ()         { return this._playlist}
+  set playlist  (songs)    { this._playlist = songs}
+  get current   ()         { return this._current; }
+  set current   (current)  { this._current = current; }
+  get last      ()         { return this._last; }
+  set last      (last)     { this._last = last; }
+  get repeat    ()         { return this._repeat; }
+  set repeat    (repeat)   { this._repeat = repeat; }
+  get changing  ()         { return this._changing; }
+  set changing  (changing) { this._changing = changing; }
+
+  get currentSong () { return this._playlist[this._current]; }
+
+  // get the SoundFile associated w/ the current song
+  now() {
+    if (this.currentSong) {
+      return this.currentSong.loader;
+    }
+  }
+
+  //return an object with the all time info about the currentSong
+  time() {
+    const timeObj = {
+      current : 0,
+      total : 0,
+      diff : 0
+    };
+    if (!this.now()) {
+      return timeObj;
+    }
+    timeObj.current = this.currentSong.currentTime();
+    timeObj.total = this.currentSong.duration();
+    timeObj.diff = timeObj.total - timeObj.current;
     return timeObj;
   }
-  timeObj.current = this.getCurrentSong().currentTime();
-  timeObj.total = this.getCurrentSong().duration();
-  timeObj.diff = timeObj.total - timeObj.current;
-  return timeObj;
-};
 
-PlayQueue.prototype.isPlaying = function() {
-  if (this.playlist[this.current] == undefined) {
-    console.log('song is undefined');
-    return false;
+  // returns boolean as to whether song is playing
+  isPlaying() {
+    if (this.currentSong === undefined) {
+      console.log('song is undefined');
+      return false;
+    }
+    if (this.now() === undefined) {
+      console.log('song loader is undefined');
+      return false;
+    }
+    return this.now().isPlaying();
   }
-  if (this.playlist[this.current].loader == undefined) {
-    console.log('song loader is undefined');
-    return false;
+
+  // changes the current song (and plays it)
+  changeSong(id, callback = function(){}) {
+    if (this.changing) {
+      return;
+    }
+    this.changing = true;
+    if (id !== undefined) {
+      let i = this.getSongIndex(id);
+      if (i !== -1 && i !== this.current) {
+        this.stop();
+        this.last = this.current;
+        this.current = i;
+        this.stop();
+        this.play();
+      }
+    }
+    callback();
   }
-  return this.now().isPlaying();
-}
-PlayQueue.prototype.changeSong = function(id, callback) {
-  if (this.changing) {
-    return;
+
+  // plays the current song from its current position or a new one if startAt is
+  // not undefined
+  play(startAt) {
+    if (!this.now().isLoaded()) return;
+    console.log('PLAY');
+    this.changePlaying(this.currentSong.id);
+    // anim.pause();
+    playButtonUpdate(true);
+    if (startAt === undefined) {
+      this.now().play();
+      console.log(this.now().isPlaying());
+    } else {
+      console.log('start with time: ' + startAt);
+      this.now().play(0, 1, VOLUME, startAt);
+    }
+    anim.play();
   }
-  this.changing = true;
-  if (id != undefined) {
-    let i = this.getSongIndex(id);
-    if (i != -1 && i != this.current) {
-      this.stop();
+
+  // pauses the current song and updates the ui
+  // TODO: move anim references out of PlayQueue entirely
+  pause() {
+    playButtonUpdate(false);
+    this.now().pause();
+    anim.pause();
+  }
+
+  // Stops playback of the current song and resets its position to the beginning
+  // takes a callback for what to do after playback is stopped
+  // updates the ui
+  stop(callback = function(){}) {
+    playButtonUpdate(false);
+    this.now().stop();
+    anim.pause();
+    anim.reset();
+    callback();
+  }
+
+  // moves to the next song in the playlist and plays it.
+  next() {
+    if (this.current + 1 === this.length() && !this.repeat) {
+      return;
+    }
+    this.stop(() => {
       this.last = this.current;
-      this.current = i;
+      this.current++;
+      if (this.current === this.length() && this.repeat) {
+        this.current = 0;
+      }
+      this.play();
+    });
+  }
+
+  // moves to the previous song in the playlist and plays it
+  previous() {
+    this.last = this.current;
+    if (this.current - 1 < 0) {
       this.stop();
       this.play();
+      return;
     }
-  }
-  callback();
-}
-PlayQueue.prototype.play = function(startAt) {
-  if (!this.now().isLoaded()) return;
-  console.log('PLAY');
-  this.changePlaying(this.getCurrentSong().id);
-  // anim.pause();
-  playButtonUpdate(true);
-  if (startAt === undefined) {
-    this.now().play();
-    console.log(this.now().isPlaying());
-  } else {
-    console.log('start with time: ' + startAt);
-    this.now().play(0, 1, VOLUME, startAt);
-  }
-  anim.play();
-}
-
-PlayQueue.prototype.pause = function() {
-  playButtonUpdate(false);
-  this.now().pause();
-  anim.pause();
-}
-
-PlayQueue.prototype.stop = function(callback) {
-  if (callback === undefined) {
-    callback = function(){};
-  }
-  playButtonUpdate(false);
-  this.now().stop();
-  anim.pause();
-  anim.reset();
-  callback();
-}
-
-PlayQueue.prototype.next = function () {
-  console.log(this.current);
-  if (this.current + 1 === this.length() && !this.repeat) {
-    return;
-  }
-  var queue = this;
-  this.stop(function(){
-    this.last = queue.current;
-    queue.current++;
-    if (queue.current === queue.length() && queue.repeat) {
-      queue.current = 0;
-    }
-    queue.play();
-  });
-};
-
-PlayQueue.prototype.previous = function () {
-  var queue = this;
-  this.last = this.current;
-  if (this.current - 1 < 0) {
-    this.stop();
-    this.play();
-    return;
-  }
-  this.stop(function(){
-    queue.current--;
-    console.log(queue.current);
-    if (queue.current < 0) {
-      queue.current = 0;
-    }
-    queue.play();
-  });
-};
-
-PlayQueue.prototype.last = function() {
-  return this.last;
-};
-
-PlayQueue.prototype.totalDuration = function() {
-  var l = this.playlist.length;
-  var totalDur = 0;
-  for (let i = 0; i < this.playlist.length; i++){
-    var s = this.playlist[i];
-    totalDur += s.duration();
-  }
-  return totalDur;
-}
-
-PlayQueue.prototype.durationAsString = function () {
-  return timeToStringFormat(this.totalDuration());
-};
-
-PlayQueue.prototype.shuffle = function() {
-  return;
-}
-
-PlayQueue.prototype.songEnded = function() {
-  var c = this.now().currentTime();
-  var d = this.now().duration();
-  console.log(c,d);
-  if (Math.abs(d - c) < .05) {
-    console.log('Song Ended. Moving on.');
-    this.next();
-  } else if (c === 0) {
-    console.log('Song may have restarted');
-    console.log(this.last, this.current);
-  } else {
-    console.log('Song probably hasn\'t ended.' + (d - c));
-    return;
-  }
-}
-
-PlayQueue.prototype.length  = function() {
-  return this.playlist.length;
-}
-
-PlayQueue.prototype.addSong = function(path, cb = undefined, name=undefined) {
-  let i = this.length();
-  startLoad();
-  var s = new Song(path, i, name);
-  var queue = this;
-  s.load(function(){
-    console.log("loaded");
-    endLoad();
-    queue.playlist.push(s);
-    queue.reloadSongListing();
-    s.setOnEnded(function() {
-      queue.songEnded();
-    });
-    if (i == 0) {
-      queue.current = i
-      queue.play();
-    }
-    if(cb) {
-      cb();
-    }
-  });
-}
-PlayQueue.prototype.isPlayingById = function(id) {
-  return this.getCurrentSong().id == id;
-}
-PlayQueue.prototype.isPlayingSong = function(song) {
-  return this.now() == song.loader;
-}
-
-PlayQueue.prototype.generateListItem = function(song) {
-  var li = "<tr class='song' data-id='" + song.id + "'>"
-      + "<td class='playing' data-playing=" + this.isPlayingSong(song) + ">"
-        + "<i class='fa fa-volume-up' aria-hidden='true'></i>"
-      + "</td>"
-      + "<td class='name'>" + song.name + "</td>"
-      + "<td class='time'>" + song.getDurationString() + "</td>"
-    + "</tr>";
-  return li;
-}
-
-PlayQueue.prototype.jumpTo = function (position) {
-  console.log(position);
-  this.stop(() => {
-    this.play(position);
-  });
-};
-
-PlayQueue.prototype.jumpAheadTen = function() {
-  if (this.now()) {
-    this.jumpTo(this.now().currentTime() + 10);
-  }
-}
-
-PlayQueue.prototype.toggleRepeat = function() {
-  this.repeat = !this.repeat;
-}
-
-PlayQueue.prototype.getSongIndex = function(id) {
-  for (let i = 0; i < this.length(); i++) {
-    if (this.playlist[i].id == id) {
-      return i;
-    }
-  }
-  return -1;
-}
-
-PlayQueue.prototype.changePlaying = function(id) {
-  var songEl = $(this.ui).find('.song[data-id="' + id + '"]');
-  if (songEl.length > 0) {
-    console.log('changing');
-    $(this.ui).find('.playing[data-playing="true"]').attr('data-playing', 'false')
-    songEl.find('.playing').attr('data-playing', 'true');
-    var name = this.playlist[this.getSongIndex(id)].name;
-    $('.current-song').html(name);
-    $.each($('.current-song:not(.overflow-help)'), function(k, v) {
-      var el = $(v);
-      if (el.width() > el.parent().parent().width()){
-        console.log('too big');
-        el.parent().addClass('overflowing');
-        el.trigger('contentChanged', true);
-      } else {
-        el.trigger('contentChanged', false);
-        el.parent().removeClass('overflowing');
+    this.stop(() => {
+      this.current--;
+      console.log(this.current);
+      if (this.current < 0) {
+        this.current = 0;
       }
+      this.play();
     });
   }
-};
 
-PlayQueue.prototype.reloadSongListing = function() {
-  console.log("update");
-  if (this.length() > $(this.ui).find('li').length){
+  // move to a new position in the song given seconds, then play from there
+  jumpTo(position) {
+    if (position < 0) position = 0;
+    console.log(position);
+    this.stop(() => {
+      this.play(position);
+    });
+  }
+
+  // move the song forward or back relative to it's current position
+  jumpBy(jump = 10) {
+    if (this.now()) {
+      const t = this.now().currentTime();
+      this.jumpTo(t + jump);
+    }
+  }
+
+  // get the total duration of the playlist in seconds
+  totalDuration() {
+    const l = this.playlist.length;
+    let totalDur = 0;
+    for (let i = 0; i < l; i++){
+      let s = this.playlist[i];
+      totalDur += s.duration();
+    }
+    return totalDur;
+  }
+
+  // gets the total duration of the playlist as a nicely formatted string
+  durationAsString() {
+    return timeToStringFormat(this.totalDuration());
+  }
+
+  // impermanently shuffles the order of the playlist
+  // TODO: write a shuffling algorithm
+  shuffle() {
+    return;
+  }
+
+  // turns repeat either on or off (opposite of current)
+  toggleRepeat() {
+    this.repeat = !this.repeat;
+  }
+
+  // function to be called when a song ends
+  songEnded() {
+    let c = this.now().currentTime();
+    let d = this.now().duration();
+    if (Math.abs(d - c) < .05) {
+      console.log('Song Ended. Moving on.');
+      this.next();
+    } else if (c === 0) {
+      console.log('Song may have restarted');
+      console.log(this.last, this.current);
+    } else {
+      console.log('Song probably hasn\'t ended.' + (d - c));
+      return;
+    }
+  }
+
+  // gets the length of the playlist
+  length() {
+    return this.playlist.length;
+  }
+
+  // create and add a song to the playlist based on a given path
+  // execute given callback
+  addSong(path, cb = function(){}, name=undefined) {
+    let i = this.length();
+    startLoad();
+    const s = new Song(path, i, name);
+    const _this = this;
+    s.load(() => {
+      console.log("loaded");
+      endLoad();
+      this.playlist.push(s);
+      this.reloadSongListing();
+      s.setOnEnded(function() {
+        _this.songEnded();
+      });
+      if (i === 0) {
+        this.current = i
+        this.play();
+      }
+      cb();
+    });
+  }
+
+  // checks whether a song by a given id is in the playlist
+  isCurrentSong(id) {
+    return this.currentSong.id === id;
+  }
+
+  // get the index of a song in the playlist by its id
+  getSongIndex(id) {
+    for (let i = 0; i < this.length(); i++) {
+      if (this.playlist[i].id === id) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // switch which song is playing in the ui given the songs id
+  changePlaying(id) {
+    var songEl = $(this.ui).find('.song[data-id="' + id + '"]');
+    if (songEl.length > 0) {
+      console.log('changing');
+      $(this.ui).find('.playing[data-playing="true"]').attr('data-playing', 'false')
+      songEl.find('.playing').attr('data-playing', 'true');
+      var name = this.playlist[this.getSongIndex(id)].name;
+      $('.current-song').html(name);
+      $.each($('.current-song:not(.overflow-help)'), function(k, v) {
+        var el = $(v);
+        if (el.width() > el.parent().parent().width()){
+          console.log('too big');
+          el.parent().addClass('overflowing');
+          el.trigger('contentChanged', true);
+        } else {
+          el.trigger('contentChanged', false);
+          el.parent().removeClass('overflowing');
+        }
+      });
+    }
+  }
+
+  // generates an entry for the ui playlist given a song
+  generateListItem(song) {
+    var li = "<tr class='song' data-id='" + song.id + "'>"
+        + "<td class='playing' data-playing=" + this.isCurrentSong(song.id) + ">"
+          + "<i class='fa fa-volume-up' aria-hidden='true'></i>"
+        + "</td>"
+        + "<td class='name'>" + song.name + "</td>"
+        + "<td class='time'>" + song.getDurationString() + "</td>"
+      + "</tr>";
+    return li;
+  }
+
+  // reload the playlist ui to contain all the songs in the object
+  reloadSongListing() {
+    console.log("update");
+    if (this.length() <= $(this.ui).find('li').length) return;
     for (let i = 0; i < this.length(); i++) {
       var s = this.playlist[i];
       var sEl = $(this.ui).find('.song[data-id="' + s.id + '"]')
       if (sEl.length == 0){
-        songListing = this.generateListItem(s);
+        let songListing = this.generateListItem(s);
         $(this.ui).append(songListing);
       }
     }
   }
-}
+  // update the ui progress bars to meet the current time of the current song
+  updateProgressBars(timeObj) {
+    $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
+  }
 
-PlayQueue.prototype.updateProgressBars = function(timeObj) {
-  $('.progress-bar').css('width',((timeObj.current * 100)/timeObj.total) + '%');
-}
-
-PlayQueue.prototype.scrub = function(pc, callback=function(){}) {
-  $('.progress-bar').css('width', pc + '%');
-  var newCurrent = pc * q.now().duration() / 100;
-  this.jumpTo(newCurrent);
-  callback();
+  // read from the progress bars and jump to that position in the song
+  scrub(pc, callback=function(){}) {
+    $('.progress-bar').css('width', pc + '%');
+    var newCurrent = pc * q.now().duration() / 100;
+    this.jumpTo(newCurrent);
+    callback();
+  }
 }
 
 
 function preload(){
   q = new PlayQueue(".playlist");
-  //q.addSong(DEFAULT_SONG, function() { q.play(); });
 }
-function setup(){
-	//mainS.setVolume(VOLUME);
-	//mainS.play();
-  //q.play()
-}
+function setup(){}
 
 function togglePlay() {
 	if(q.now().isPlaying()) {
@@ -393,27 +455,4 @@ var playButtonUpdate = function(playing) {
 
 var showErrorMessage = function(msg) {
 	alert(msg);
-}
-
-// Author:  Jacek Becela
-// Source:  http://gist.github.com/399624
-// License: MIT
-
-jQuery.fn.single_double_click = function(single_click_callback, double_click_callback, timeout) {
-  return this.each(function(){
-    var clicks = 0, self = this;
-    jQuery(this).click(function(event){
-      clicks++;
-      if (clicks == 1) {
-        setTimeout(function(){
-          if(clicks == 1) {
-            single_click_callback.call(self, event);
-          } else {
-            double_click_callback.call(self, event);
-          }
-          clicks = 0;
-        }, timeout || 300);
-      }
-    });
-  });
 }

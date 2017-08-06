@@ -61,8 +61,8 @@ function getColorFromWaveform(index)
 {
 	var waveform = fft.waveform();
 	//get a lower and upper bound for the waveform
-	var waveMin = Math.min.apply(null,waveform);
-	var waveMax = Math.max.apply(null,waveform);
+	var waveMin = Math.min.apply(null, waveform);
+	var waveMax = Math.max.apply(null, waveform);
 
 	var waveAbsolute = waveform[index] - waveMin;
 	var waveColor = (waveAbsolute / (waveMax - waveMin))*360;
