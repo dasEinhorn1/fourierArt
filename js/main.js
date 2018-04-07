@@ -1,3 +1,5 @@
+// const Promise = require('es6-promise-polyfill').Promise;
+
 var loadFiles = function(i, files) {
   $('.load-progress').html('Loading: ' + (i + 1) + '/' + files.length);
   if (i >= files.length) return;

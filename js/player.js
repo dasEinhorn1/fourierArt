@@ -64,25 +64,23 @@ class Song {
   set id      (id)      { this._id = id; }
 
   load(callback) {
-    this._loader = loadSound(this._path,
-      () => { return callback();},
-      () => showErrorMessage("Error adding song"));
-    if (this._loader) {
+    return this._loader = new Promise(function (resolve, reject) {
+      loadSound(this._path, (song) => { resolve(song) }, (err) => { reject(err) }).bind(this);
+    }).then((song) => {
       this._loader.setVolume(VOLUME);
       this._loader.playMode('restart');
-      return true;
-    }
-    return false;
+      return song;
+    });
   }
 
   /* Get the duration of a song in seconds*/
   duration() {
-    return this._loader.duration();
+    return this._loader.then((song)=>song.duration());
   }
 
   /* Get the current position in seconds in the song */
   currentTime() {
-    return this._loader.currentTime();
+    return this._loader.then((song)=> song.currentTime());
   }
 
   /* Nicely format the duration as a string */
@@ -92,7 +90,7 @@ class Song {
 
   /* Set what happens once the song finishes */
   setOnEnded(callback) {
-    this._loader.onended(callback);
+    this._loader.then((song)=> song.onended(callback));
   }
 }
 
